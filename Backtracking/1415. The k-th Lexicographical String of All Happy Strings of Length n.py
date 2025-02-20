@@ -1,4 +1,4 @@
-# Intuition
+# Intuition:
 # Backtracking is very simple .This is having 3 steps
 # 1.Do->2.Explore->3.Undo and repeat this untill we meet the base case
 #----------------------------------------------------------------------Time complexity: O(N*2^N)-------------------------------------------------------------------------------
