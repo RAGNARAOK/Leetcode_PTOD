@@ -5,7 +5,8 @@
 # Return the count of days when the employee is available for work but no meetings are scheduled.
 
 # Note: The meetings may overlap
-
+# TC : O(NLogN)
+# SC : O((N)
 class Solution:
     def countDays(self, days: int, meetings: List[List[int]]) -> int:
         meetings.sort()
