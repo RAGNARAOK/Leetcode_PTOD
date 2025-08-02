@@ -1,0 +1,2054 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Elastomer Demand Planning EDA</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/luxon@2.3.0/build/global/luxon.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@3.7.0/dist/chart.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-luxon@1.1.0/dist/chartjs-adapter-luxon.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.0.0"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f0f4f8;
+            color: #334155;
+            line-height: 1.6;
+            transition: background-color 0.3s ease, color 0.3s ease;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+        .card {
+            background-color: white;
+            border-radius: 0.5rem;
+            padding: 1.5rem;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            transition: transform 0.2s;
+        }
+        .card:hover {
+            transform: translateY(-5px);
+        }
+        .sub-section-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: #1f2937;
+            margin-bottom: 1rem;
+        }
+        .chart-container-small {
+            position: relative;
+            height: 300px;
+            width: 100%;
+        }
+        .styled-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.9rem;
+            text-align: left;
+        }
+        .styled-table thead tr {
+            background-color: #4b5563;
+            color: #ffffff;
+            text-align: left;
+        }
+        .styled-table th,
+        .styled-table td {
+            padding: 12px 15px;
+        }
+        .styled-table tbody tr {
+            border-bottom: 1px solid #e5e7eb;
+        }
+        .styled-table tbody tr:nth-of-type(even) {
+            background-color: #f3f4f6;
+        }
+        .styled-table tbody tr:last-of-type {
+            border-bottom: 2px solid #4b5563;
+        }
+        .card {
+            background-color: #ffffff;
+            border-radius: 1rem;
+            padding: 2rem;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+        }
+        .gradient-title {
+            background-image: linear-gradient(90deg, #1d4ed8, #2563eb);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+            font-weight: 700;
+        }
+        .section-title {
+            font-size: 1.875rem;
+            line-height: 2.25rem;
+            margin-bottom: 1.5rem;
+        }
+        .chart-container {
+            position: relative;
+            height: 400px; /* Fixed height for consistent chart display */
+        }
+
+        .toc-nested-list.collapsed {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease-out;
+        }
+
+        .toc-nested-list:not(.collapsed) {
+            max-height: 500px;
+            transition: max-height 0.5s ease-in;
+        }
+
+        .toc-arrow.rotated {
+            transform: rotate(90deg);
+        }
+
+        #sidebar::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        #sidebar::-webkit-scrollbar-track {
+            background: #4a5568;
+            border-radius: 10px;
+        }
+
+        #sidebar::-webkit-scrollbar-thumb {
+            background: #6b7280;
+            border-radius: 10px;
+        }
+
+        #sidebar::-webkit-scrollbar-thumb:hover {
+            background: #9ca3af;
+        }
+
+        #toc-list a {
+            display: block;
+            padding: 0.5rem 0.75rem;
+            border-radius: 0.5rem;
+            color: #e2e8f0;
+            transition: background-color 0.2s ease, color 0.2s ease;
+        }
+
+        #toc-list a:hover {
+            background-color: #4a5568;
+            color: #ffffff;
+        }
+
+        #toc-list a.active {
+            background-color: #00A6FB;
+            color: #ffffff;
+            font-weight: 600;
+        }
+
+        @media (min-width: 768px) {
+            .container {
+                padding: 2rem;
+            }
+        }
+
+        .metric-box {
+            background-color: #e0f2fe;
+            border-radius: 0.75rem;
+            padding: 1rem;
+            text-align: center;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            height: 100%;
+            transition: background-color 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .metric-value {
+            font-size: 2.25rem;
+            font-weight: 700;
+            color: #0d47a1;
+            margin-bottom: 0.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            transition: color 0.3s ease;
+        }
+
+        .metric-label {
+            font-size: 0.875rem;
+            font-weight: 500;
+            color: #475569;
+            transition: color 0.3s ease;
+        }
+
+        .metric-description {
+            font-size: 0.75rem;
+            color: #64748b;
+            margin-top: 0.25rem;
+            transition: color 0.3s ease;
+        }
+
+        .trend-icon {
+            font-size: 1.5rem;
+            line-height: 1;
+        }
+
+        .trend-up {
+            color: #22c55e;
+        }
+
+        .trend-down {
+            color: #ef4444;
+        }
+
+        .trend-neutral {
+            color: #64748b;
+        }
+
+        .styled-table th {
+            background-color: #009FDF;
+            padding: 12px;
+            color: #FFF;
+            text-align: left;
+        }
+
+        .styled-table td {
+            padding: 12px;
+            border-bottom: 1px solid #e2e8f0;
+        }
+
+        .styled-table tbody tr:nth-child(odd) {
+            background-color: #ffffff;
+        }
+
+        .styled-table tbody tr:nth-child(even) {
+            background-color: #f8fafc;
+        }
+
+        .styled-table th, .styled-table td {
+            text-align: center;
+        }
+    </style>
+</head>
+<body class="antialiased">
+    <div id="sidebar" class="fixed top-0 left-0 h-full w-0 md:w-64 bg-gray-800 text-white shadow-lg z-50 transition-all duration-300 ease-in-out overflow-hidden flex flex-col">
+        <div class="p-4 flex items-center justify-between bg-gray-900">
+            <h3 class="text-xl font-bold text-white">Table of Contents</h3>
+            <button id="close-sidebar-btn" class="text-white hover:text-gray-300 focus:outline-none md:hidden">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+            </button>
+        </div>
+        <nav class="flex-grow overflow-y-auto p-4">
+            <ul id="toc-list" class="space-y-2">
+                <!-- Table of contents items will be dynamically generated here -->
+            </ul>
+        </nav>
+    </div>
+
+    <div id="main-content-wrapper" class="ml-0 md:ml-64 transition-all duration-300 ease-in-out">
+        <button id="sidebar-toggle" class="fixed top-4 left-4 z-40 p-2 bg-gray-800 text-white rounded-full shadow-lg md:hidden hover:bg-gray-700 focus:outline-none">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path></svg>
+        </button>
+
+        <header class="bg-white shadow py-4 relative">
+            <div class="container mx-auto flex justify-center items-center px-4">
+                <h1 class="text-3xl sm:text-4xl font-extrabold gradient-title text-center">
+                    Elastomer Demand Planning EDA
+                </h1>
+            </div>
+        </header>
+
+        <main class="container mx-auto py-8 px-4">
+            <!-- EDA - Elastomers Section -->
+            <section id="eda-elastomers" class="card">
+                <h2 class="section-title gradient-title">EDA - Elastomers</h2>
+                <p class="text-lg text-gray-700 mb-4">
+                    <strong>Exploratory Data Analysis (EDA)</strong> is the first step in understanding our data. It helps uncover key patterns, trends, and business insights hidden in raw data.
+                </p>
+                <p class="text-lg text-gray-700 mb-4">
+                    For the <strong>Polymers Demand Planning</strong> project, EDA helps us:
+                </p>
+                <ul class="list-disc list-inside text-gray-600 space-y-2 mb-4">
+                    <li>See how sales have moved over time for each product and region</li>
+                    <li>Find key patterns (like seasonality or growth) and unusual spikes/drops</li>
+                    <li>Check if data is complete and clean before modeling</li>
+                    <li>Understand how internal factors (like customer type, price) and external factors (like feedstock or macro data) impact demand</li>
+                </ul>
+                <p class="text-lg text-gray-700">
+                    EDA is a critical foundation for building accurate, explainable, and business-aligned demand forecasts (unconstrained). This report summarizes those insights to support better decision-making and an effective AI/ML forecast solution.
+                </p>
+            </section>
+
+            <!-- Overview of Elastomers Section -->
+            <section id="overview" class="card">
+                <h2 class="section-title gradient-title">Overview of Elastomers</h2>
+                <p class="text-lg text-gray-700 mb-4">
+                    Elastomers are polymers with viscoelasticity, commonly known as rubbers. They possess the unique ability to return to their original shape after being stretched or deformed. This elasticity makes them indispensable across a vast array of applications.
+                </p>
+                <p class="text-lg text-gray-700 mb-4">
+                    Key characteristics include high elongation, flexibility, and resilience, which are crucial for performance in demanding environments. Understanding these properties through EDA is vital for material design, quality control, and predicting long-term behavior.
+                </p>
+                <p class="text-lg text-gray-700">
+                    Common types include Natural Rubber (NR), Styrene-Butadiene Rubber (SBR), Ethylene Propylene Diene Monomer (EPDM), Nitrile Butadiene Rubber (NBR), and Silicone Rubber. Each type offers distinct advantages for specific applications, from automotive components to medical devices.
+                </p>
+            </section>
+
+            <!-- Executive Summary Section -->
+            <section id="executive-summary" class="card">
+                <h2 class="section-title gradient-title">Executive Summary</h2>
+                <!-- Content will be added later -->
+            </section>
+
+            <!-- Data Summary Section -->
+            <section id="data-summary" class="card">
+                <h2 class="section-title gradient-title">1. Data Summary</h2>
+                <h3 class="sub-section-title" id="distinct-values-summary">1.1 Distinct Values Summary for Product and Customer Hierarchies</h3>
+
+                <!-- Flexbox container for side-by-side tables -->
+                <div class="flex flex-col md:flex-row gap-8">
+                    <!-- Product Hierarchy Table -->
+                    <div class="flex-1">
+                        <h4 class="text-lg font-semibold mb-2 text-gray-800">Product Hierarchy</h4>
+                        <table class="styled-table shadow-md">
+                            <thead>
+                                <tr>
+                                    <th>S.No</th>
+                                    <th>product_level</th>
+                                    <th>unique count</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr class="bg-white">
+                                    <td class="p-3 text-center border-b border-gray-200">1</td>
+                                    <td class="p-3 text-center border-b border-gray-200">Sku</td>
+                                    <td class="p-3 text-center border-b border-gray-200">392</td>
+                                </tr>
+                                <tr class="bg-gray-50">
+                                    <td class="p-3 text-center border-b border-gray-200">2</td>
+                                    <td class="p-3 text-center border-b border-gray-200">Grade</td>
+                                    <td class="p-3 text-center border-b border-gray-200">203</td>
+                                </tr>
+                                <tr class="bg-white">
+                                    <td class="p-3 text-center border-b border-gray-200">3</td>
+                                    <td class="p-3 text-center border-b border-gray-200">Product Application</td>
+                                    <td class="p-3 text-center border-b border-gray-200">64</td>
+                                </tr>
+                                <tr class="bg-gray-50">
+                                    <td class="p-3 text-center border-b border-gray-200">4</td>
+                                    <td class="p-3 text-center border-b border-gray-200">Product Group</td>
+                                    <td class="p-3 text-center border-b border-gray-200">35</td>
+                                </tr>
+                                <tr class="bg-white">
+                                    <td class="p-3 text-center border-b border-gray-200">5</td>
+                                    <td class="p-3 text-center border-b border-gray-200">Product Family</td>
+                                    <td class="p-3 text-center border-b border-gray-200">1</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    
+                    <!-- Customer Hierarchy Table -->
+                    <div class="flex-1">
+                        <h4 class="text-lg font-semibold mb-2 text-gray-800">Customer Hierarchy</h4>
+                        <table class="styled-table shadow-md">
+                            <thead>
+                                <tr>
+                                    <th>S.No</th>
+                                    <th>customer_level</th>
+                                    <th>unique count</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr class="bg-white">
+                                    <td class="p-3 text-center border-b border-gray-200">1</td>
+                                    <td class="p-3 text-center border-b border-gray-200">Shipto</td>
+                                    <td class="p-3 text-center border-b border-gray-200">605</td>
+                                </tr>
+                                <tr class="bg-gray-50">
+                                    <td class="p-3 text-center border-b border-gray-200">2</td>
+                                    <td class="p-3 text-center border-b border-gray-200">Soldto</td>
+                                    <td class="p-3 text-center border-b border-gray-200">357</td>
+                                </tr>
+                                <tr class="bg-white">
+                                    <td class="p-3 text-center border-b border-gray-200">3</td>
+                                    <td class="p-3 text-center border-b border-gray-200">Planning Territory</td>
+                                    <td class="p-3 text-center border-b border-gray-200">59</td>
+                                </tr>
+                                <tr class="bg-gray-50">
+                                    <td class="p-3 text-center border-b border-gray-200">4</td>
+                                    <td class="p-3 text-center border-b border-gray-200">Planning Group</td>
+                                    <td class="p-3 text-center border-b border-gray-200">21</td>
+                                </tr>
+                                <tr class="bg-white">
+                                    <td class="p-3 text-center border-b border-gray-200">5</td>
+                                    <td class="p-3 text-center border-b border-gray-200">Planning Region</td>
+                                    <td class="p-3 text-center border-b border-gray-200">5</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <h3 class="sub-section-title" id="combined-distinct-count">1.2 Product and Customer Combined Distinct Count</h3>
+                <div class="space-y-8">
+                    <table class="styled-table shadow-md">
+                        <thead>
+                            <tr>
+                                <th>S.No</th>
+                                <th>Attribute</th>
+                                <th>Value</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr class="bg-white">
+                                <td class="p-3 text-center border-b border-gray-200">1</td>
+                                <td class="p-3 text-center border-b border-gray-200">Range of Data</td>
+                                <td class="p-3 text-center border-b border-gray-200">2020 - 2024</td>
+                            </tr>
+                            <tr class="bg-gray-50">
+                                <td class="p-3 text-center border-b border-gray-200">2</td>
+                                <td class="p-3 text-center border-b border-gray-200">Region</td>
+                                <td class="p-3 text-center border-b border-gray-200">[AMERICAS, GC, ROA, MEAF, EUROPE]</td>
+                            </tr>
+                            <tr class="bg-white">
+                                <td class="p-3 text-center border-b border-gray-200">3</td>
+                                <td class="p-3 text-center border-b border-gray-200">Unique SKU - Ship-To Combinations</td>
+                                <td class="p-3 text-center border-b border-gray-200">1263</td>
+                            </tr>
+                            <tr class="bg-gray-50">
+                                <td class="p-3 text-center border-b border-gray-200">4</td>
+                                <td class="p-3 text-center border-b border-gray-200">Unique SKU - Sold-To Combinations</td>
+                                <td class="p-3 text-center border-b border-gray-200">882</td>
+                            </tr>
+                            <tr class="bg-white">
+                                <td class="p-3 text-center border-b border-gray-200">5</td>
+                                <td class="p-3 text-center border-b border-gray-200">Unique Grade - Country Combinations</td>
+                                <td class="p-3 text-center border-b border-gray-200">224</td>
+                            </tr>
+                            <tr class="bg-gray-50">
+                                <td class="p-3 text-center border-b border-gray-200">6</td>
+                                <td class="p-3 text-center border-b border-gray-200">Unique Grade - Territory Combinations</td>
+                                <td class="p-3 text-center border-b border-gray-200">237</td>
+                            </tr>
+                            <tr class="bg-white">
+                                <td class="p-3 text-center border-b border-gray-200">7</td>
+                                <td class="p-3 text-center border-b border-gray-200">Unique Grade - Planning Group Combinations</td>
+                                <td class="p-3 text-center border-b border-gray-200">135</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <h3 class="sub-section-title" id="data-completeness">1.3 Data Completeness</h3>
+                <div class="space-y-8">
+                    <table class="styled-table shadow-md">
+                        <thead>
+                            <tr>
+                                <th>S.No</th>
+                                <th>Feature</th>
+                                <th>Values Present (%)</th>
+                                <th>Missing (%)</th>
+                                <th>Zeros (%)</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr class="bg-white">
+                                <td class="p-3 text-center border-b border-gray-200">0</td>
+                                <td class="p-3 text-center border-b border-gray-200">Grade</td>
+                                <td class="p-3 text-center border-b border-gray-200">100.00</td>
+                                <td class="p-3 text-center border-b border-gray-200">0.00</td>
+                                <td class="p-3 text-center border-b border-gray-200">0.00</td>
+                            </tr>
+                            <tr class="bg-gray-50">
+                                <td class="p-3 text-center border-b border-gray-200">1</td>
+                                <td class="p-3 text-center border-b border-gray-200">Soldto</td>
+                                <td class="p-3 text-center border-b border-gray-200">100.00</td>
+                                <td class="p-3 text-center border-b border-gray-200">0.00</td>
+                                <td class="p-3 text-center border-b border-gray-200">0.00</td>
+                            </tr>
+                            <tr class="bg-white">
+                                <td class="p-3 text-center border-b border-gray-200">2</td>
+                                <td class="p-3 text-center border-b border-gray-200">Yearmonth</td>
+                                <td class="p-3 text-center border-b border-gray-200">100.00</td>
+                                <td class="p-3 text-center border-b border-gray-200">0.00</td>
+                                <td class="p-3 text-center border-b border-gray-200">0.00</td>
+                            </tr>
+                            <tr class="bg-gray-50">
+                                <td class="p-3 text-center border-b border-gray-200">3</td>
+                                <td class="p-3 text-center border-b border-gray-200">Shipto</td>
+                                <td class="p-3 text-center border-b border-gray-200">100.00</td>
+                                <td class="p-3 text-center border-b border-gray-200">0.00</td>
+                                <td class="p-3 text-center border-b border-gray-200">0.00</td>
+                            </tr>
+                            <tr class="bg-white">
+                                <td class="p-3 text-center border-b border-gray-200">4</td>
+                                <td class="p-3 text-center border-b border-gray-200">Sku</td>
+                                <td class="p-3 text-center border-b border-gray-200">100.00</td>
+                                <td class="p-3 text-center border-b border-gray-200">0.00</td>
+                                <td class="p-3 text-center border-b border-gray-200">0.00</td>
+                            </tr>
+                            <tr class="bg-gray-50">
+                                <td class="p-3 text-center border-b border-gray-200">5</td>
+                                <td class="p-3 text-center border-b border-gray-200">Confirmed Quantity</td>
+                                <td class="p-3 text-center border-b border-gray-200">100.00</td>
+                                <td class="p-3 text-center border-b border-gray-200">0.00</td>
+                                <td class="p-3 text-center border-b border-gray-200">0.00</td>
+                            </tr>
+                            <tr class="bg-white">
+                                <td class="p-3 text-center border-b border-gray-200">6</td>
+                                <td class="p-3 text-center border-b border-gray-200">delivered_quantity</td>
+                                <td class="p-3 text-center border-b border-gray-200">100.00</td>
+                                <td class="p-3 text-center border-b border-gray-200">0.00</td>
+                                <td class="p-3 text-center border-b border-gray-200">0.00</td>
+                            </tr>
+                            <tr class="bg-gray-50">
+                                <td class="p-3 text-center border-b border-gray-200">7</td>
+                                <td class="p-3 text-center border-b border-gray-200">inco_terms_1</td>
+                                <td class="p-3 text-center border-b border-gray-200">100.00</td>
+                                <td class="p-3 text-center border-b border-gray-200">0.00</td>
+                                <td class="p-3 text-center border-b border-gray-200">0.00</td>
+                            </tr>
+                            <tr class="bg-white">
+                                <td class="p-3 text-center border-b border-gray-200">8</td>
+                                <td class="p-3 text-center border-b border-gray-200">customer_priority</td>
+                                <td class="p-3 text-center border-b border-gray-200">100.00</td>
+                                <td class="p-3 text-center border-b border-gray-200">0.00</td>
+                                <td class="p-3 text-center border-b border-gray-200">0.00</td>
+                            </tr>
+                            <tr class="bg-gray-50">
+                                <td class="p-3 text-center border-b border-gray-200">9</td>
+                                <td class="p-3 text-center border-b border-gray-200">customer_type</td>
+                                <td class="p-3 text-center border-b border-gray-200">99.97</td>
+                                <td class="p-3 text-center border-b border-gray-200">0.03</td>
+                                <td class="p-3 text-center border-b border-gray-200">0.00</td>
+                            </tr>
+                            <tr class="bg-white">
+                                <td class="p-3 text-center border-b border-gray-200">10</td>
+                                <td class="p-3 text-center border-b border-gray-200">contracts</td>
+                                <td class="p-3 text-center border-b border-gray-200">100.00</td>
+                                <td class="p-3 text-center border-b border-gray-200">0.00</td>
+                                <td class="p-3 text-center border-b border-gray-200">0.00</td>
+                            </tr>
+                            <tr class="bg-gray-50">
+                                <td class="p-3 text-center border-b border-gray-200">11</td>
+                                <td class="p-3 text-center border-b border-gray-200">Product Application</td>
+                                <td class="p-3 text-center border-b border-gray-200">100.00</td>
+                                <td class="p-3 text-center border-b border-gray-200">0.00</td>
+                                <td class="p-3 text-center border-b border-gray-200">0.00</td>
+                            </tr>
+                            <tr class="bg-white">
+                                <td class="p-3 text-center border-b border-gray-200">12</td>
+                                <td class="p-3 text-center border-b border-gray-200">net_price_usd</td>
+                                <td class="p-3 text-center border-b border-gray-200">100.00</td>
+                                <td class="p-3 text-center border-b border-gray-200">0.00</td>
+                                <td class="p-3 text-center border-b border-gray-200">0.00</td>
+                            </tr>
+                            <tr class="bg-gray-50">
+                                <td class="p-3 text-center border-b border-gray-200">13</td>
+                                <td class="p-3 text-center border-b border-gray-200">currency_Updated</td>
+                                <td class="p-3 text-center border-b border-gray-200">100.00</td>
+                                <td class="p-3 text-center border-b border-gray-200">0.00</td>
+                                <td class="p-3 text-center border-b border-gray-200">0.00</td>
+                            </tr>
+                            <tr class="bg-white">
+                                <td class="p-3 text-center border-b border-gray-200">14</td>
+                                <td class="p-3 text-center border-b border-gray-200">corrected_quantity</td>
+                                <td class="p-3 text-center border-b border-gray-200">100.00</td>
+                                <td class="p-3 text-center border-b border-gray-200">0.00</td>
+                                <td class="p-3 text-center border-b border-gray-200">0.00</td>
+                            </tr>
+                            <tr class="bg-gray-50">
+                                <td class="p-3 text-center border-b border-gray-200">15</td>
+                                <td class="p-3 text-center border-b border-gray-200">requested_quantity</td>
+                                <td class="p-3 text-center border-b border-gray-200">100.00</td>
+                                <td class="p-3 text-center border-b border-gray-200">0.00</td>
+                                <td class="p-3 text-center border-b border-gray-200">0.00</td>
+                            </tr>
+                            <tr class="bg-white">
+                                <td class="p-3 text-center border-b border-gray-200">16</td>
+                                <td class="p-3 text-center border-b border-gray-200">storage_location</td>
+                                <td class="p-3 text-center border-b border-gray-200">100.00</td>
+                                <td class="p-3 text-center border-b border-gray-200">0.00</td>
+                                <td class="p-3 text-center border-b border-gray-200">0.00</td>
+                            </tr>
+                            <tr class="bg-gray-50">
+                                <td class="p-3 text-center border-b border-gray-200">17</td>
+                                <td class="p-3 text-center border-b border-gray-200">shipping_point</td>
+                                <td class="p-3 text-center border-b border-gray-200">100.00</td>
+                                <td class="p-3 text-center border-b border-gray-200">0.00</td>
+                                <td class="p-3 text-center border-b border-gray-200">0.00</td>
+                            </tr>
+                            <tr class="bg-white">
+                                <td class="p-3 text-center border-b border-gray-200">18</td>
+                                <td class="p-3 text-center border-b border-gray-200">delivery_model</td>
+                                <td class="p-3 text-center border-b border-gray-200">100.00</td>
+                                <td class="p-3 text-center border-b border-gray-200">0.00</td>
+                                <td class="p-3 text-center border-b border-gray-200">0.00</td>
+                            </tr>
+                            <tr class="bg-gray-50">
+                                <td class="p-3 text-center border-b border-gray-200">19</td>
+                                <td class="p-3 text-center border-b border-gray-200">count_of_sales_order</td>
+                                <td class="p-3 text-center border-b border-gray-200">100.00</td>
+                                <td class="p-3 text-center border-b border-gray-200">0.00</td>
+                                <td class="p-3 text-center border-b border-gray-200">0.00</td>
+                            </tr>
+                            <tr class="bg-white">
+                                <td class="p-3 text-center border-b border-gray-200">20</td>
+                                <td class="p-3 text-center border-b border-gray-200">material_desc</td>
+                                <td class="p-3 text-center border-b border-gray-200">100.00</td>
+                                <td class="p-3 text-center border-b border-gray-200">0.00</td>
+                                <td class="p-3 text-center border-b border-gray-200">0.00</td>
+                            </tr>
+                            <tr class="bg-gray-50">
+                                <td class="p-3 text-center border-b border-gray-200">21</td>
+                                <td class="p-3 text-center border-b border-gray-200">product</td>
+                                <td class="p-3 text-center border-b border-gray-200">100.00</td>
+                                <td class="p-3 text-center border-b border-gray-200">0.00</td>
+                                <td class="p-3 text-center border-b border-gray-200">0.00</td>
+                            </tr>
+                            <tr class="bg-white">
+                                <td class="p-3 text-center border-b border-gray-200">22</td>
+                                <td class="p-3 text-center border-b border-gray-200">ship_to_country_code</td>
+                                <td class="p-3 text-center border-b border-gray-200">100.00</td>
+                                <td class="p-3 text-center border-b border-gray-200">0.00</td>
+                                <td class="p-3 text-center border-b border-gray-200">0.00</td>
+                            </tr>
+                            <tr class="bg-gray-50">
+                                <td class="p-3 text-center border-b border-gray-200">23</td>
+                                <td class="p-3 text-center border-b border-gray-200">ship_to_name</td>
+                                <td class="p-3 text-center border-b border-gray-200">100.00</td>
+                                <td class="p-3 text-center border-b border-gray-200">0.00</td>
+                                <td class="p-3 text-center border-b border-gray-200">0.00</td>
+                            </tr>
+                            <tr class="bg-white">
+                                <td class="p-3 text-center border-b border-gray-200">24</td>
+                                <td class="p-3 text-center border-b border-gray-200">sold_to_country_code</td>
+                                <td class="p-3 text-center border-b border-gray-200">100.00</td>
+                                <td class="p-3 text-center border-b border-gray-200">0.00</td>
+                                <td class="p-3 text-center border-b border-gray-200">0.00</td>
+                            </tr>
+                            <tr class="bg-gray-50">
+                                <td class="p-3 text-center border-b border-gray-200">25</td>
+                                <td class="p-3 text-center border-b border-gray-200">sold_to_name</td>
+                                <td class="p-3 text-center border-b border-gray-200">100.00</td>
+                                <td class="p-3 text-center border-b border-gray-200">0.00</td>
+                                <td class="p-3 text-center border-b border-gray-200">0.00</td>
+                            </tr>
+                            <tr class="bg-white">
+                                <td class="p-3 text-center border-b border-gray-200">26</td>
+                                <td class="p-3 text-center border-b border-gray-200">Revenue</td>
+                                <td class="p-3 text-center border-b border-gray-200">100.00</td>
+                                <td class="p-3 text-center border-b border-gray-200">0.00</td>
+                                <td class="p-3 text-center border-b border-gray-200">0.00</td>
+                            </tr>
+                            <tr class="bg-gray-50">
+                                <td class="p-3 text-center border-b border-gray-200">27</td>
+                                <td class="p-3 text-center border-b border-gray-200">customer_status</td>
+                                <td class="p-3 text-center border-b border-gray-200">0.00</td>
+                                <td class="p-3 text-center border-b border-gray-200">100.00</td>
+                                <td class="p-3 text-center border-b border-gray-200">0.00</td>
+                            </tr>
+                            <tr class="bg-white">
+                                <td class="p-3 text-center border-b border-gray-200">28</td>
+                                <td class="p-3 text-center border-b border-gray-200">product_status</td>
+                                <td class="p-3 text-center border-b border-gray-200">96.59</td>
+                                <td class="p-3 text-center border-b border-gray-200">3.41</td>
+                                <td class="p-3 text-center border-b border-gray-200">0.00</td>
+                            </tr>
+                            <tr class="bg-gray-50">
+                                <td class="p-3 text-center border-b border-gray-200">29</td>
+                                <td class="p-3 text-center border-b border-gray-200">demand_fullfilment</td>
+                                <td class="p-3 text-center border-b border-gray-200">82.76</td>
+                                <td class="p-3 text-center border-b border-gray-200">17.24</td>
+                                <td class="p-3 text-center border-b border-gray-200">0.00</td>
+                            </tr>
+                            <tr class="bg-white">
+                                <td class="p-3 text-center border-b border-gray-200">30</td>
+                                <td class="p-3 text-center border-b border-gray-200">forecast_cluster</td>
+                                <td class="p-3 text-center border-b border-gray-200">37.19</td>
+                                <td class="p-3 text-center border-b border-gray-200">62.81</td>
+                                <td class="p-3 text-center border-b border-gray-200">0.00</td>
+                            </tr>
+                            <tr class="bg-gray-50">
+                                <td class="p-3 text-center border-b border-gray-200">31</td>
+                                <td class="p-3 text-center border-b border-gray-200">Product Group</td>
+                                <td class="p-3 text-center border-b border-gray-200">100.00</td>
+                                <td class="p-3 text-center border-b border-gray-200">0.00</td>
+                                <td class="p-3 text-center border-b border-gray-200">0.00</td>
+                            </tr>
+                            <tr class="bg-white">
+                                <td class="p-3 text-center border-b border-gray-200">32</td>
+                                <td class="p-3 text-center border-b border-gray-200">Product Family</td>
+                                <td class="p-3 text-center border-b border-gray-200">100.00</td>
+                                <td class="p-3 text-center border-b border-gray-200">0.00</td>
+                                <td class="p-3 text-center border-b border-gray-200">0.00</td>
+                            </tr>
+                            <tr class="bg-gray-50">
+                                <td class="p-3 text-center border-b border-gray-200">33</td>
+                                <td class="p-3 text-center border-b border-gray-200">Planning Territory</td>
+                                <td class="p-3 text-center border-b border-gray-200">100.00</td>
+                                <td class="p-3 text-center border-b border-gray-200">0.00</td>
+                                <td class="p-3 text-center border-b border-gray-200">0.00</td>
+                            </tr>
+                            <tr class="bg-white">
+                                <td class="p-3 text-center border-b border-gray-200">34</td>
+                                <td class="p-3 text-center border-b border-gray-200">Planning Group</td>
+                                <td class="p-3 text-center border-b border-gray-200">100.00</td>
+                                <td class="p-3 text-center border-b border-gray-200">0.00</td>
+                                <td class="p-3 text-center border-b border-gray-200">0.00</td>
+                            </tr>
+                            <tr class="bg-gray-50">
+                                <td class="p-3 text-center border-b border-gray-200">35</td>
+                                <td class="p-3 text-center border-b border-gray-200">Planning Region</td>
+                                <td class="p-3 text-center border-b border-gray-200">100.00</td>
+                                <td class="p-3 text-center border-b border-gray-200">0.00</td>
+                                <td class="p-3 text-center border-b border-gray-200">0.00</td>
+                            </tr>
+                            <tr class="bg-white">
+                                <td class="p-3 text-center border-b border-gray-200">36</td>
+                                <td class="p-3 text-center border-b border-gray-200">affiliate_assest_location</td>
+                                <td class="p-3 text-center border-b border-gray-200">100.00</td>
+                                <td class="p-3 text-center border-b border-gray-200">0.00</td>
+                                <td class="p-3 text-center border-b border-gray-200">0.00</td>
+                            </tr>
+                            <tr class="bg-gray-50">
+                                <td class="p-3 text-center border-b border-gray-200">37</td>
+                                <td class="p-3 text-center border-b border-gray-200">Acrylonitrile</td>
+                                <td class="p-3 text-center border-b border-gray-200">0.00</td>
+                                <td class="p-3 text-center border-b border-gray-200">100.00</td>
+                                <td class="p-3 text-center border-b border-gray-200">0.00</td>
+                            </tr>
+                            <tr class="bg-white">
+                                <td class="p-3 text-center border-b border-gray-200">38</td>
+                                <td class="p-3 text-center border-b border-gray-200">Acrylonitrile-Butadiene-Styrene_ABS_Resins</td>
+                                <td class="p-3 text-center border-b border-gray-200">0.00</td>
+                                <td class="p-3 text-center border-b border-gray-200">100.00</td>
+                                <td class="p-3 text-center border-b border-gray-200">0.00</td>
+                            </tr>
+                            <tr class="bg-gray-50">
+                                <td class="p-3 text-center border-b border-gray-200">39</td>
+                                <td class="p-3 text-center border-b border-gray-200">Bisphenol_A_BPA</td>
+                                <td class="p-3 text-center border-b border-gray-200">0.00</td>
+                                <td class="p-3 text-center border-b border-gray-200">100.00</td>
+                                <td class="p-3 text-center border-b border-gray-200">0.00</td>
+                            </tr>
+                            <tr class="bg-white">
+                                <td class="p-3 text-center border-b border-gray-200">40</td>
+                                <td class="p-3 text-center border-b border-gray-200">Butadiene_BDE</td>
+                                <td class="p-3 text-center border-b border-gray-200">33.62</td>
+                                <td class="p-3 text-center border-b border-gray-200">66.38</td>
+                                <td class="p-3 text-center border-b border-gray-200">0.00</td>
+                            </tr>
+                            <tr class="bg-gray-50">
+                                <td class="p-3 text-center border-b border-gray-200">41</td>
+                                <td class="p-3 text-center border-b border-gray-200">Chlorine</td>
+                                <td class="p-3 text-center border-b border-gray-200">47.08</td>
+                                <td class="p-3 text-center border-b border-gray-200">52.92</td>
+                                <td class="p-3 text-center border-b border-gray-200">0.00</td>
+                            </tr>
+                            <tr class="bg-white">
+                                <td class="p-3 text-center border-b border-gray-200">42</td>
+                                <td class="p-3 text-center border-b border-gray-200">Ethylene</td>
+                                <td class="p-3 text-center border-b border-gray-200">0.00</td>
+                                <td class="p-3 text-center border-b border-gray-200">100.00</td>
+                                <td class="p-3 text-center border-b border-gray-200">0.00</td>
+                            </tr>
+                            <tr class="bg-gray-50">
+                                <td class="p-3 text-center border-b border-gray-200">43</td>
+                                <td class="p-3 text-center border-b border-gray-200">Ethylene_Glycol_Monobutyl_Ether</td>
+                                <td class="p-3 text-center border-b border-gray-200">0.00</td>
+                                <td class="p-3 text-center border-b border-gray-200">100.00</td>
+                                <td class="p-3 text-center border-b border-gray-200">0.00</td>
+                            </tr>
+                            <tr class="bg-white">
+                                <td class="p-3 text-center border-b border-gray-200">44</td>
+                                <td class="p-3 text-center border-b border-gray-200">Polybutylene_Terephthalate_PBT</td>
+                                <td class="p-3 text-center border-b border-gray-200">0.00</td>
+                                <td class="p-3 text-center border-b border-gray-200">100.00</td>
+                                <td class="p-3 text-center border-b border-gray-200">0.00</td>
+                            </tr>
+                            <tr class="bg-gray-50">
+                                <td class="p-3 text-center border-b border-gray-200">45</td>
+                                <td class="p-3 text-center border-b border-gray-200">Polycarbonate_Resins</td>
+                                <td class="p-3 text-center border-b border-gray-200">0.00</td>
+                                <td class="p-3 text-center border-b border-gray-200">100.00</td>
+                                <td class="p-3 text-center border-b border-gray-200">0.00</td>
+                            </tr>
+                            <tr class="bg-white">
+                                <td class="p-3 text-center border-b border-gray-200">46</td>
+                                <td class="p-3 text-center border-b border-gray-200">Polyethylene_Terephthalate_PET,_Bottle_Resin</td>
+                                <td class="p-3 text-center border-b border-gray-200">0.00</td>
+                                <td class="p-3 text-center border-b border-gray-200">100.00</td>
+                                <td class="p-3 text-center border-b border-gray-200">0.00</td>
+                            </tr>
+                            <tr class="bg-gray-50">
+                                <td class="p-3 text-center border-b border-gray-200">47</td>
+                                <td class="p-3 text-center border-b border-gray-200">Polyvinyl_Chloride_PVC</td>
+                                <td class="p-3 text-center border-b border-gray-200">0.00</td>
+                                <td class="p-3 text-center border-b border-gray-200">100.00</td>
+                                <td class="p-3 text-center border-b border-gray-200">0.00</td>
+                            </tr>
+                            <tr class="bg-white">
+                                <td class="p-3 text-center border-b border-gray-200">48</td>
+                                <td class="p-3 text-center border-b border-gray-200">Propylene</td>
+                                <td class="p-3 text-center border-b border-gray-200">0.00</td>
+                                <td class="p-3 text-center border-b border-gray-200">100.00</td>
+                                <td class="p-3 text-center border-b border-gray-200">0.00</td>
+                            </tr>
+                            <tr class="bg-gray-50">
+                                <td class="p-3 text-center border-b border-gray-200">49</td>
+                                <td class="p-3 text-center border-b border-gray-200">Styrene</td>
+                                <td class="p-3 text-center border-b border-gray-200">0.00</td>
+                                <td class="p-3 text-center border-b border-gray-200">100.00</td>
+                                <td class="p-3 text-center border-b border-gray-200">0.00</td>
+                            </tr>
+                            <tr class="bg-white">
+                                <td class="p-3 text-center border-b border-gray-200">50</td>
+                                <td class="p-3 text-center border-b border-gray-200">Terephthalic_Acid_PTA</td>
+                                <td class="p-3 text-center border-b border-gray-200">0.00</td>
+                                <td class="p-3 text-center border-b border-gray-200">100.00</td>
+                                <td class="p-3 text-center border-b border-gray-200">0.00</td>
+                            </tr>
+                            <tr class="bg-gray-50">
+                                <td class="p-3 text-center border-b border-gray-200">51</td>
+                                <td class="p-3 text-center border-b border-gray-200">country_name</td>
+                                <td class="p-3 text-center border-b border-gray-200">100.00</td>
+                                <td class="p-3 text-center border-b border-gray-200">0.00</td>
+                                <td class="p-3 text-center border-b border-gray-200">0.00</td>
+                            </tr>
+                            <tr class="bg-white">
+                                <td class="p-3 text-center border-b border-gray-200">52</td>
+                                <td class="p-3 text-center border-b border-gray-200">year</td>
+                                <td class="p-3 text-center border-b border-gray-200">100.00</td>
+                                <td class="p-3 text-center border-b border-gray-200">0.00</td>
+                                <td class="p-3 text-center border-b border-gray-200">0.00</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+            
+            <!-- Outlier Report Section -->
+            <section id="outlier-report" class="card">
+                <h2 class="section-title gradient-title">1.4 Outlier Report</h2>
+                <h3 class="sub-section-title">Outlier Summary</h3>
+                <p class="text-lg text-gray-700 mb-2">
+                    An outlier detection analysis was performed to identify anomalous data points in the dataset.
+                </p>
+                <ul class="list-disc list-inside text-gray-600 mb-4">
+                    <li><strong>Total Combos:</strong> 45</li>
+                    <li><strong>Outlier Combos:</strong> 27</li>
+                    <li><strong>Normal Combos:</strong> 18</li>
+                </ul>
+
+                <h4 class="text-lg font-semibold mb-2 text-gray-800">Outlier Details</h4>
+                <table class="styled-table shadow-md">
+                    <thead>
+                        <tr>
+                            <th>Combo</th>
+                            <th>Total Records</th>
+                            <th>Total Records Outlier</th>
+                            <th>Normal Records</th>
+                            <th>% of Outlier</th>
+                            <th>Min Value</th>
+                            <th>Max Value</th>
+                            <th>Mean Value</th>
+                            <th>Method</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr class="bg-white">
+                            <td class="p-3 text-center border-b border-gray-200">EPDM__PG-EGYPT</td>
+                            <td class="p-3 text-center border-b border-gray-200">31</td>
+                            <td class="p-3 text-center border-b border-gray-200">6</td>
+                            <td class="p-3 text-center border-b border-gray-200">25</td>
+                            <td class="p-3 text-center border-b border-gray-200">19.35%</td>
+                            <td class="p-3 text-center border-b border-gray-200">0.00</td>
+                            <td class="p-3 text-center border-b border-gray-200">60.00</td>
+                            <td class="p-3 text-center border-b border-gray-200">6.13</td>
+                            <td class="p-3 text-center border-b border-gray-200">IQR</td>
+                        </tr>
+                        <tr class="bg-gray-50">
+                            <td class="p-3 text-center border-b border-gray-200">EPDM__PG-SEA</td>
+                            <td class="p-3 text-center border-b border-gray-200">41</td>
+                            <td class="p-3 text-center border-b border-gray-200">4</td>
+                            <td class="p-3 text-center border-b border-gray-200">37</td>
+                            <td class="p-3 text-center border-b border-gray-200">9.76%</td>
+                            <td class="p-3 text-center border-b border-gray-200">0.00</td>
+                            <td class="p-3 text-center border-b border-gray-200">27.00</td>
+                            <td class="p-3 text-center border-b border-gray-200">30.76</td>
+                            <td class="p-3 text-center border-b border-gray-200">IQR</td>
+                        </tr>
+                        <tr class="bg-white">
+                            <td class="p-3 text-center border-b border-gray-200">EPDM__PG-R AFRI</td>
+                            <td class="p-3 text-center border-b border-gray-200">52</td>
+                            <td class="p-3 text-center border-b border-gray-200">5</td>
+                            <td class="p-3 text-center border-b border-gray-200">47</td>
+                            <td class="p-3 text-center border-b border-gray-200">9.62%</td>
+                            <td class="p-3 text-center border-b border-gray-200">0.00</td>
+                            <td class="p-3 text-center border-b border-gray-200">177.50</td>
+                            <td class="p-3 text-center border-b border-gray-200">17.55</td>
+                            <td class="p-3 text-center border-b border-gray-200">IQR</td>
+                        </tr>
+                        <tr class="bg-gray-50">
+                            <td class="p-3 text-center border-b border-gray-200">EPDM__PG-L AMERI</td>
+                            <td class="p-3 text-center border-b border-gray-200">32</td>
+                            <td class="p-3 text-center border-b border-gray-200">3</td>
+                            <td class="p-3 text-center border-b border-gray-200">29</td>
+                            <td class="p-3 text-center border-b border-gray-200">9.38%</td>
+                            <td class="p-3 text-center border-b border-gray-200">0.00</td>
+                            <td class="p-3 text-center border-b border-gray-200">171.00</td>
+                            <td class="p-3 text-center border-b border-gray-200">34.40</td>
+                            <td class="p-3 text-center border-b border-gray-200">IQR</td>
+                        </tr>
+                        <tr class="bg-white">
+                            <td class="p-3 text-center border-b border-gray-200">EPDM__PG-INS</td>
+                            <td class="p-3 text-center border-b border-gray-200">48</td>
+                            <td class="p-3 text-center border-b border-gray-200">4</td>
+                            <td class="p-3 text-center border-b border-gray-200">44</td>
+                            <td class="p-3 text-center border-b border-gray-200">8.33%</td>
+                            <td class="p-3 text-center border-b border-gray-200">0.00</td>
+                            <td class="p-3 text-center border-b border-gray-200">132.50</td>
+                            <td class="p-3 text-center border-b border-gray-200">21.35</td>
+                            <td class="p-3 text-center border-b border-gray-200">IQR</td>
+                        </tr>
+                        <tr class="bg-gray-50">
+                            <td class="p-3 text-center border-b border-gray-200">EPDM__PG-S AMR</td>
+                            <td class="p-3 text-center border-b border-gray-200">41</td>
+                            <td class="p-3 text-center border-b border-gray-200">3</td>
+                            <td class="p-3 text-center border-b border-gray-200">38</td>
+                            <td class="p-3 text-center border-b border-gray-200">7.32%</td>
+                            <td class="p-3 text-center border-b border-gray-200">0.00</td>
+                            <td class="p-3 text-center border-b border-gray-200">215.25</td>
+                            <td class="p-3 text-center border-b border-gray-200">17.71</td>
+                            <td class="p-3 text-center border-b border-gray-200">IQR</td>
+                        </tr>
+                        <tr class="bg-white">
+                            <td class="p-3 text-center border-b border-gray-200">EPDM__PG-CIS</td>
+                            <td class="p-3 text-center border-b border-gray-200">14</td>
+                            <td class="p-3 text-center border-b border-gray-200">1</td>
+                            <td class="p-3 text-center border-b border-gray-200">13</td>
+                            <td class="p-3 text-center border-b border-gray-200">7.14%</td>
+                            <td class="p-3 text-center border-b border-gray-200">0.00</td>
+                            <td class="p-3 text-center border-b border-gray-200">157.50</td>
+                            <td class="p-3 text-center border-b border-gray-200">36.64</td>
+                            <td class="p-3 text-center border-b border-gray-200">IQR</td>
+                        </tr>
+                        <tr class="bg-gray-50">
+                            <td class="p-3 text-center border-b border-gray-200">CB00__PG-ME</td>
+                            <td class="p-3 text-center border-b border-gray-200">58</td>
+                            <td class="p-3 text-center border-b border-gray-200">4</td>
+                            <td class="p-3 text-center border-b border-gray-200">54</td>
+                            <td class="p-3 text-center border-b border-gray-200">6.90%</td>
+                            <td class="p-3 text-center border-b border-gray-200">0.00</td>
+                            <td class="p-3 text-center border-b border-gray-200">86.00</td>
+                            <td class="p-3 text-center border-b border-gray-200">13.31</td>
+                            <td class="p-3 text-center border-b border-gray-200">IQR</td>
+                        </tr>
+                        <tr class="bg-white">
+                            <td class="p-3 text-center border-b border-gray-200">EPDM__PG-S ASIA</td>
+                            <td class="p-3 text-center border-b border-gray-200">60</td>
+                            <td class="p-3 text-center border-b border-gray-200">4</td>
+                            <td class="p-3 text-center border-b border-gray-200">56</td>
+                            <td class="p-3 text-center border-b border-gray-200">6.67%</td>
+                            <td class="p-3 text-center border-b border-gray-200">0.00</td>
+                            <td class="p-3 text-center border-b border-gray-200">225.00</td>
+                            <td class="p-3 text-center border-b border-gray-200">33.06</td>
+                            <td class="p-3 text-center border-b border-gray-200">IQR</td>
+                        </tr>
+                        <tr class="bg-gray-50">
+                            <td class="p-3 text-center border-b border-gray-200">BR00__PG-N AFRI</td>
+                            <td class="p-3 text-center border-b border-gray-200">60</td>
+                            <td class="p-3 text-center border-b border-gray-200">4</td>
+                            <td class="p-3 text-center border-b border-gray-200">56</td>
+                            <td class="p-3 text-center border-b border-gray-200">6.67%</td>
+                            <td class="p-3 text-center border-b border-gray-200">0.00</td>
+                            <td class="p-3 text-center border-b border-gray-200">221.76</td>
+                            <td class="p-3 text-center border-b border-gray-200">38.98</td>
+                            <td class="p-3 text-center border-b border-gray-200">IQR</td>
+                        </tr>
+                        <tr class="bg-white">
+                            <td class="p-3 text-center border-b border-gray-200">EPDM__PG-KOREA</td>
+                            <td class="p-3 text-center border-b border-gray-200">47</td>
+                            <td class="p-3 text-center border-b border-gray-200">3</td>
+                            <td class="p-3 text-center border-b border-gray-200">44</td>
+                            <td class="p-3 text-center border-b border-gray-200">6.38%</td>
+                            <td class="p-3 text-center border-b border-gray-200">0.00</td>
+                            <td class="p-3 text-center border-b border-gray-200">90.00</td>
+                            <td class="p-3 text-center border-b border-gray-200">20.15</td>
+                            <td class="p-3 text-center border-b border-gray-200">IQR</td>
+                        </tr>
+                        <tr class="bg-gray-50">
+                            <td class="p-3 text-center border-b border-gray-200">EPDM__PG-ME</td>
+                            <td class="p-3 text-center border-b border-gray-200">59</td>
+                            <td class="p-3 text-center border-b border-gray-200">3</td>
+                            <td class="p-3 text-center border-b border-gray-200">56</td>
+                            <td class="p-3 text-center border-b border-gray-200">5.08%</td>
+                            <td class="p-3 text-center border-b border-gray-200">0.00</td>
+                            <td class="p-3 text-center border-b border-gray-200">135.00</td>
+                            <td class="p-3 text-center border-b border-gray-200">22.09</td>
+                            <td class="p-3 text-center border-b border-gray-200">IQR</td>
+                        </tr>
+                        <tr class="bg-white">
+                            <td class="p-3 text-center border-b border-gray-200">EPDM__PG-TURKEY</td>
+                            <td class="p-3 text-center border-b border-gray-200">60</td>
+                            <td class="p-3 text-center border-b border-gray-200">3</td>
+                            <td class="p-3 text-center border-b border-gray-200">57</td>
+                            <td class="p-3 text-center border-b border-gray-200">5.00%</td>
+                            <td class="p-3 text-center border-b border-gray-200">0.00</td>
+                            <td class="p-3 text-center border-b border-gray-200">225.00</td>
+                            <td class="p-3 text-center border-b border-gray-200">79.56</td>
+                            <td class="p-3 text-center border-b border-gray-200">IQR</td>
+                        </tr>
+                        <tr class="bg-gray-50">
+                            <td class="p-3 text-center border-b border-gray-200">BR00__PG-S AMR</td>
+                            <td class="p-3 text-center border-b border-gray-200">54</td>
+                            <td class="p-3 text-center border-b border-gray-200">2</td>
+                            <td class="p-3 text-center border-b border-gray-200">52</td>
+                            <td class="p-3 text-center border-b border-gray-200">3.70%</td>
+                            <td class="p-3 text-center border-b border-gray-200">0.00</td>
+                            <td class="p-3 text-center border-b border-gray-200">1552.32</td>
+                            <td class="p-3 text-center border-b border-gray-200">194.44</td>
+                            <td class="p-3 text-center border-b border-gray-200">IQR</td>
+                        </tr>
+                        <tr class="bg-white">
+                            <td class="p-3 text-center border-b border-gray-200">CB00__PG-N AMR</td>
+                            <td class="p-3 text-center border-b border-gray-200">60</td>
+                            <td class="p-3 text-center border-b border-gray-200">2</td>
+                            <td class="p-3 text-center border-b border-gray-200">58</td>
+                            <td class="p-3 text-center border-b border-gray-200">3.33%</td>
+                            <td class="p-3 text-center border-b border-gray-200">20.00</td>
+                            <td class="p-3 text-center border-b border-gray-200">3307.00</td>
+                            <td class="p-3 text-center border-b border-gray-200">1421.13</td>
+                            <td class="p-3 text-center border-b border-gray-200">IQR</td>
+                        </tr>
+                        <tr class="bg-gray-50">
+                            <td class="p-3 text-center border-b border-gray-200">EPDM__PG-N AMR</td>
+                            <td class="p-3 text-center border-b border-gray-200">60</td>
+                            <td class="p-3 text-center border-b border-gray-200">2</td>
+                            <td class="p-3 text-center border-b border-gray-200">58</td>
+                            <td class="p-3 text-center border-b border-gray-200">3.33%</td>
+                            <td class="p-3 text-center border-b border-gray-200">4.38</td>
+                            <td class="p-3 text-center border-b border-gray-200">2685.10</td>
+                            <td class="p-3 text-center border-b border-gray-200">366.22</td>
+                            <td class="p-3 text-center border-b border-gray-200">IQR</td>
+                        </tr>
+                        <tr class="bg-white">
+                            <td class="p-3 text-center border-b border-gray-200">BR00__PG-PACIFIC</td>
+                            <td class="p-3 text-center border-b border-gray-200">60</td>
+                            <td class="p-3 text-center border-b border-gray-200">2</td>
+                            <td class="p-3 text-center border-b border-gray-200">58</td>
+                            <td class="p-3 text-center border-b border-gray-200">3.33%</td>
+                            <td class="p-3 text-center border-b border-gray-200">0.00</td>
+                            <td class="p-3 text-center border-b border-gray-200">443.52</td>
+                            <td class="p-3 text-center border-b border-gray-200">81.65</td>
+                            <td class="p-3 text-center border-b border-gray-200">IQR</td>
+                        </tr>
+                        <tr class="bg-gray-50">
+                            <td class="p-3 text-center border-b border-gray-200">BR00__PG-R AFRI</td>
+                            <td class="p-3 text-center border-b border-gray-200">42</td>
+                            <td class="p-3 text-center border-b border-gray-200">1</td>
+                            <td class="p-3 text-center border-b border-gray-200">41</td>
+                            <td class="p-3 text-center border-b border-gray-200">2.38%</td>
+                            <td class="p-3 text-center border-b border-gray-200">0.00</td>
+                            <td class="p-3 text-center border-b border-gray-200">282.24</td>
+                            <td class="p-3 text-center border-b border-gray-200">53.76</td>
+                            <td class="p-3 text-center border-b border-gray-200">IQR</td>
+                        </tr>
+                        <tr class="bg-white">
+                            <td class="p-3 text-center border-b border-gray-200">BR00__PG-N AMR</td>
+                            <td class="p-3 text-center border-b border-gray-200">54</td>
+                            <td class="p-3 text-center border-b border-gray-200">1</td>
+                            <td class="p-3 text-center border-b border-gray-200">53</td>
+                            <td class="p-3 text-center border-b border-gray-200">1.85%</td>
+                            <td class="p-3 text-center border-b border-gray-200">0.00</td>
+                            <td class="p-3 text-center border-b border-gray-200">806.40</td>
+                            <td class="p-3 text-center border-b border-gray-200">209.27</td>
+                            <td class="p-3 text-center border-b border-gray-200">IQR</td>
+                        </tr>
+                        <tr class="bg-gray-50">
+                            <td class="p-3 text-center border-b border-gray-200">BR00__PG-INS</td>
+                            <td class="p-3 text-center border-b border-gray-200">59</td>
+                            <td class="p-3 text-center border-b border-gray-200">1</td>
+                            <td class="p-3 text-center border-b border-gray-200">58</td>
+                            <td class="p-3 text-center border-b border-gray-200">1.69%</td>
+                            <td class="p-3 text-center border-b border-gray-200">0.00</td>
+                            <td class="p-3 text-center border-b border-gray-200">2842.56</td>
+                            <td class="p-3 text-center border-b border-gray-200">832.71</td>
+                            <td class="p-3 text-center border-b border-gray-200">IQR</td>
+                        </tr>
+                        <tr class="bg-white">
+                            <td class="p-3 text-center border-b border-gray-200">EPDM__PG-GCC</td>
+                            <td class="p-3 text-center border-b border-gray-200">60</td>
+                            <td class="p-3 text-center border-b border-gray-200">1</td>
+                            <td class="p-3 text-center border-b border-gray-200">59</td>
+                            <td class="p-3 text-center border-b border-gray-200">1.67%</td>
+                            <td class="p-3 text-center border-b border-gray-200">0.00</td>
+                            <td class="p-3 text-center border-b border-gray-200">292.50</td>
+                            <td class="p-3 text-center border-b border-gray-200">93.29</td>
+                            <td class="p-3 text-center border-b border-gray-200">IQR</td>
+                        </tr>
+                        <tr class="bg-gray-50">
+                            <td class="p-3 text-center border-b border-gray-200">BR00__PG-CHINA</td>
+                            <td class="p-3 text-center border-b border-gray-200">60</td>
+                            <td class="p-3 text-center border-b border-gray-200">1</td>
+                            <td class="p-3 text-center border-b border-gray-200">59</td>
+                            <td class="p-3 text-center border-b border-gray-200">1.67%</td>
+                            <td class="p-3 text-center border-b border-gray-200">0.00</td>
+                            <td class="p-3 text-center border-b border-gray-200">5544.00</td>
+                            <td class="p-3 text-center border-b border-gray-200">1377.94</td>
+                            <td class="p-3 text-center border-b border-gray-200">IQR</td>
+                        </tr>
+                        <tr class="bg-white">
+                            <td class="p-3 text-center border-b border-gray-200">EPDM__PG-PACIFIC</td>
+                            <td class="p-3 text-center border-b border-gray-200">60</td>
+                            <td class="p-3 text-center border-b border-gray-200">1</td>
+                            <td class="p-3 text-center border-b border-gray-200">59</td>
+                            <td class="p-3 text-center border-b border-gray-200">1.67%</td>
+                            <td class="p-3 text-center border-b border-gray-200">0.00</td>
+                            <td class="p-3 text-center border-b border-gray-200">427.50</td>
+                            <td class="p-3 text-center border-b border-gray-200">96.45</td>
+                            <td class="p-3 text-center border-b border-gray-200">IQR</td>
+                        </tr>
+                        <tr class="bg-gray-50">
+                            <td class="p-3 text-center border-b border-gray-200">BR00__PG-TURKEY</td>
+                            <td class="p-3 text-center border-b border-gray-200">60</td>
+                            <td class="p-3 text-center border-b border-gray-200">1</td>
+                            <td class="p-3 text-center border-b border-gray-200">59</td>
+                            <td class="p-3 text-center border-b border-gray-200">1.67%</td>
+                            <td class="p-3 text-center border-b border-gray-200">0.00</td>
+                            <td class="p-3 text-center border-b border-gray-200">1330.56</td>
+                            <td class="p-3 text-center border-b border-gray-200">421.24</td>
+                            <td class="p-3 text-center border-b border-gray-200">IQR</td>
+                        </tr>
+                        <tr class="bg-white">
+                            <td class="p-3 text-center border-b border-gray-200">BR00__PG-SEA</td>
+                            <td class="p-3 text-center border-b border-gray-200">60</td>
+                            <td class="p-3 text-center border-b border-gray-200">1</td>
+                            <td class="p-3 text-center border-b border-gray-200">59</td>
+                            <td class="p-3 text-center border-b border-gray-200">1.67%</td>
+                            <td class="p-3 text-center border-b border-gray-200">0.00</td>
+                            <td class="p-3 text-center border-b border-gray-200">302.40</td>
+                            <td class="p-3 text-center border-b border-gray-200">79.30</td>
+                            <td class="p-3 text-center border-b border-gray-200">IQR</td>
+                        </tr>
+                        <tr class="bg-gray-50">
+                            <td class="p-3 text-center border-b border-gray-200">EPDM__PG-PO3</td>
+                            <td class="p-3 text-center border-b border-gray-200">60</td>
+                            <td class="p-3 text-center border-b border-gray-200">1</td>
+                            <td class="p-3 text-center border-b border-gray-200">59</td>
+                            <td class="p-3 text-center border-b border-gray-200">1.67%</td>
+                            <td class="p-3 text-center border-b border-gray-200">255.25</td>
+                            <td class="p-3 text-center border-b border-gray-200">1165.45</td>
+                            <td class="p-3 text-center border-b border-gray-200">592.73</td>
+                            <td class="p-3 text-center border-b border-gray-200">IQR</td>
+                        </tr>
+                        <tr class="bg-white">
+                            <td class="p-3 text-center border-b border-gray-200">EPDM__PG-PO5</td>
+                            <td class="p-3 text-center border-b border-gray-200">60</td>
+                            <td class="p-3 text-center border-b border-gray-200">1</td>
+                            <td class="p-3 text-center border-b border-gray-200">59</td>
+                            <td class="p-3 text-center border-b border-gray-200">1.67%</td>
+                            <td class="p-3 text-center border-b border-gray-200">0.00</td>
+                            <td class="p-3 text-center border-b border-gray-200">187.50</td>
+                            <td class="p-3 text-center border-b border-gray-200">48.77</td>
+                            <td class="p-3 text-center border-b border-gray-200">IQR</td>
+                        </tr>
+                        <tr class="bg-gray-50">
+                            <td class="p-3 text-center border-b border-gray-200">EPDM__PG-PO4</td>
+                            <td class="p-3 text-center border-b border-gray-200">9</td>
+                            <td class="p-3 text-center border-b border-gray-200">0</td>
+                            <td class="p-3 text-center border-b border-gray-200">9</td>
+                            <td class="p-3 text-center border-b border-gray-200">0.00%</td>
+                            <td class="p-3 text-center border-b border-gray-200">0.00</td>
+                            <td class="p-3 text-center border-b border-gray-200">148.75</td>
+                            <td class="p-3 text-center border-b border-gray-200">40.06</td>
+                            <td class="p-3 text-center border-b border-gray-200">IQR</td>
+                        </tr>
+                        <tr class="bg-white">
+                            <td class="p-3 text-center border-b border-gray-200">EPDM__PG-KSA</td>
+                            <td class="p-3 text-center border-b border-gray-200">60</td>
+                            <td class="p-3 text-center border-b border-gray-200">0</td>
+                            <td class="p-3 text-center border-b border-gray-200">60</td>
+                            <td class="p-3 text-center border-b border-gray-200">0.00%</td>
+                            <td class="p-3 text-center border-b border-gray-200">0.00</td>
+                            <td class="p-3 text-center border-b border-gray-200">900.00</td>
+                            <td class="p-3 text-center border-b border-gray-200">316.43</td>
+                            <td class="p-3 text-center border-b border-gray-200">Z-score</td>
+                        </tr>
+                        <tr class="bg-gray-50">
+                            <td class="p-3 text-center border-b border-gray-200">CB00__PG-TURKEY</td>
+                            <td class="p-3 text-center border-b border-gray-200">43</td>
+                            <td class="p-3 text-center border-b border-gray-200">0</td>
+                            <td class="p-3 text-center border-b border-gray-200">43</td>
+                            <td class="p-3 text-center border-b border-gray-200">0.00%</td>
+                            <td class="p-3 text-center border-b border-gray-200">0.00</td>
+                            <td class="p-3 text-center border-b border-gray-200">621.00</td>
+                            <td class="p-3 text-center border-b border-gray-200">182.50</td>
+                            <td class="p-3 text-center border-b border-gray-200">IQR</td>
+                        </tr>
+                        <tr class="bg-white">
+                            <td class="p-3 text-center border-b border-gray-200">EPDM__PG-JAPAN</td>
+                            <td class="p-3 text-center border-b border-gray-200">49</td>
+                            <td class="p-3 text-center border-b border-gray-200">0</td>
+                            <td class="p-3 text-center border-b border-gray-200">49</td>
+                            <td class="p-3 text-center border-b border-gray-200">0.00%</td>
+                            <td class="p-3 text-center border-b border-gray-200">0.00</td>
+                            <td class="p-3 text-center border-b border-gray-200">45.00</td>
+                            <td class="p-3 text-center border-b border-gray-200">7.35</td>
+                            <td class="p-3 text-center border-b border-gray-200">IQR</td>
+                        </tr>
+                        <tr class="bg-gray-50">
+                            <td class="p-3 text-center border-b border-gray-200">EPDM__PG-CHINA</td>
+                            <td class="p-3 text-center border-b border-gray-200">60</td>
+                            <td class="p-3 text-center border-b border-gray-200">0</td>
+                            <td class="p-3 text-center border-b border-gray-200">60</td>
+                            <td class="p-3 text-center border-b border-gray-200">0.00%</td>
+                            <td class="p-3 text-center border-b border-gray-200">110.00</td>
+                            <td class="p-3 text-center border-b border-gray-200">3756.50</td>
+                            <td class="p-3 text-center border-b border-gray-200">1487.42</td>
+                            <td class="p-3 text-center border-b border-gray-200">Z-score</td>
+                        </tr>
+                        <tr class="bg-white">
+                            <td class="p-3 text-center border-b border-gray-200">BR00__PG-EGYPT</td>
+                            <td class="p-3 text-center border-b border-gray-200">13</td>
+                            <td class="p-3 text-center border-b border-gray-200">0</td>
+                            <td class="p-3 text-center border-b border-gray-200">13</td>
+                            <td class="p-3 text-center border-b border-gray-200">0.00%</td>
+                            <td class="p-3 text-center border-b border-gray-200">0.00</td>
+                            <td class="p-3 text-center border-b border-gray-200">20.16</td>
+                            <td class="p-3 text-center border-b border-gray-200">4.65</td>
+                            <td class="p-3 text-center border-b border-gray-200">IQR</td>
+                        </tr>
+                        <tr class="bg-gray-50">
+                            <td class="p-3 text-center border-b border-gray-200">CB00__PG-KSA</td>
+                            <td class="p-3 text-center border-b border-gray-200">59</td>
+                            <td class="p-3 text-center border-b border-gray-200">0</td>
+                            <td class="p-3 text-center border-b border-gray-200">59</td>
+                            <td class="p-3 text-center border-b border-gray-200">0.00%</td>
+                            <td class="p-3 text-center border-b border-gray-200">0.00</td>
+                            <td class="p-3 text-center border-b border-gray-200">745.40</td>
+                            <td class="p-3 text-center border-b border-gray-200">193.37</td>
+                            <td class="p-3 text-center border-b border-gray-200">IQR</td>
+                        </tr>
+                        <tr class="bg-white">
+                            <td class="p-3 text-center border-b border-gray-200">CB00__PG-GCC</td>
+                            <td class="p-3 text-center border-b border-gray-200">60</td>
+                            <td class="p-3 text-center border-b border-gray-200">0</td>
+                            <td class="p-3 text-center border-b border-gray-200">60</td>
+                            <td class="p-3 text-center border-b border-gray-200">0.00%</td>
+                            <td class="p-3 text-center border-b border-gray-200">0.00</td>
+                            <td class="p-3 text-center border-b border-gray-200">204.00</td>
+                            <td class="p-3 text-center border-b border-gray-200">55.51</td>
+                            <td class="p-3 text-center border-b border-gray-200">IQR</td>
+                        </tr>
+                        <tr class="bg-gray-50">
+                            <td class="p-3 text-center border-b border-gray-200">BR00__PG-S ASIA</td>
+                            <td class="p-3 text-center border-b border-gray-200">28</td>
+                            <td class="p-3 text-center border-b border-gray-200">0</td>
+                            <td class="p-3 text-center border-b border-gray-200">28</td>
+                            <td class="p-3 text-center border-b border-gray-200">0.00%</td>
+                            <td class="p-3 text-center border-b border-gray-200">0.00</td>
+                            <td class="p-3 text-center border-b border-gray-200">40.32</td>
+                            <td class="p-3 text-center border-b border-gray-200">6.48</td>
+                            <td class="p-3 text-center border-b border-gray-200">IQR</td>
+                        </tr>
+                        <tr class="bg-white">
+                            <td class="p-3 text-center border-b border-gray-200">BR00__PG-PO5</td>
+                            <td class="p-3 text-center border-b border-gray-200">53</td>
+                            <td class="p-3 text-center border-b border-gray-200">0</td>
+                            <td class="p-3 text-center border-b border-gray-200">53</td>
+                            <td class="p-3 text-center border-b border-gray-200">0.00%</td>
+                            <td class="p-3 text-center border-b border-gray-200">0.00</td>
+                            <td class="p-3 text-center border-b border-gray-200">107.10</td>
+                            <td class="p-3 text-center border-b border-gray-200">43.86</td>
+                            <td class="p-3 text-center border-b border-gray-200">Z-score</td>
+                        </tr>
+                        <tr class="bg-gray-50">
+                            <td class="p-3 text-center border-b border-gray-200">BR00__PG-PO3</td>
+                            <td class="p-3 text-center border-b border-gray-200">60</td>
+                            <td class="p-3 text-center border-b border-gray-200">0</td>
+                            <td class="p-3 text-center border-b border-gray-200">60</td>
+                            <td class="p-3 text-center border-b border-gray-200">0.00%</td>
+                            <td class="p-3 text-center border-b border-gray-200">0.00</td>
+                            <td class="p-3 text-center border-b border-gray-200">1166.76</td>
+                            <td class="p-3 text-center border-b border-gray-200">387.47</td>
+                            <td class="p-3 text-center border-b border-gray-200">Z-score</td>
+                        </tr>
+                        <tr class="bg-white">
+                            <td class="p-3 text-center border-b border-gray-200">BR00__PG-ME</td>
+                            <td class="p-3 text-center border-b border-gray-200">24</td>
+                            <td class="p-3 text-center border-b border-gray-200">0</td>
+                            <td class="p-3 text-center border-b border-gray-200">24</td>
+                            <td class="p-3 text-center border-b border-gray-200">0.00%</td>
+                            <td class="p-3 text-center border-b border-gray-200">0.00</td>
+                            <td class="p-3 text-center border-b border-gray-200">25.20</td>
+                            <td class="p-3 text-center border-b border-gray-200">4.20</td>
+                            <td class="p-3 text-center border-b border-gray-200">IQR</td>
+                        </tr>
+                        <tr class="bg-gray-50">
+                            <td class="p-3 text-center border-b border-gray-200">BR00__PG-L AMERI</td>
+                            <td class="p-3 text-center border-b border-gray-200">17</td>
+                            <td class="p-3 text-center border-b border-gray-200">0</td>
+                            <td class="p-3 text-center border-b border-gray-200">17</td>
+                            <td class="p-3 text-center border-b border-gray-200">0.00%</td>
+                            <td class="p-3 text-center border-b border-gray-200">0.00</td>
+                            <td class="p-3 text-center border-b border-gray-200">20.16</td>
+                            <td class="p-3 text-center border-b border-gray-200">3.50</td>
+                            <td class="p-3 text-center border-b border-gray-200">IQR</td>
+                        </tr>
+                        <tr class="bg-white">
+                            <td class="p-3 text-center border-b border-gray-200">BR00__PG-KSA</td>
+                            <td class="p-3 text-center border-b border-gray-200">60</td>
+                            <td class="p-3 text-center border-b border-gray-200">0</td>
+                            <td class="p-3 text-center border-b border-gray-200">60</td>
+                            <td class="p-3 text-center border-b border-gray-200">0.00%</td>
+                            <td class="p-3 text-center border-b border-gray-200">604.80</td>
+                            <td class="p-3 text-center border-b border-gray-200">5544.00</td>
+                            <td class="p-3 text-center border-b border-gray-200">2625.40</td>
+                            <td class="p-3 text-center border-b border-gray-200">Z-score</td>
+                        </tr>
+                        <tr class="bg-gray-50">
+                            <td class="p-3 text-center border-b border-gray-200">BR00__PG-KOREA</td>
+                            <td class="p-3 text-center border-b border-gray-200">40</td>
+                            <td class="p-3 text-center border-b border-gray-200">0</td>
+                            <td class="p-3 text-center border-b border-gray-200">40</td>
+                            <td class="p-3 text-center border-b border-gray-200">0.00%</td>
+                            <td class="p-3 text-center border-b border-gray-200">0.00</td>
+                            <td class="p-3 text-center border-b border-gray-200">40.32</td>
+                            <td class="p-3 text-center border-b border-gray-200">6.55</td>
+                            <td class="p-3 text-center border-b border-gray-200">IQR</td>
+                        </tr>
+                        <tr class="bg-white">
+                            <td class="p-3 text-center border-b border-gray-200">BR00__PG-GCC</td>
+                            <td class="p-3 text-center border-b border-gray-200">56</td>
+                            <td class="p-3 text-center border-b border-gray-200">0</td>
+                            <td class="p-3 text-center border-b border-gray-200">56</td>
+                            <td class="p-3 text-center border-b border-gray-200">0.00%</td>
+                            <td class="p-3 text-center border-b border-gray-200">0.00</td>
+                            <td class="p-3 text-center border-b border-gray-200">25.20</td>
+                            <td class="p-3 text-center border-b border-gray-200">2.27</td>
+                            <td class="p-3 text-center border-b border-gray-200">IQR</td>
+                        </tr>
+                        <tr class="bg-gray-50">
+                            <td class="p-3 text-center border-b border-gray-200">POE0__PG-PO5</td>
+                            <td class="p-3 text-center border-b border-gray-200">60</td>
+                            <td class="p-3 text-center border-b border-gray-200">0</td>
+                            <td class="p-3 text-center border-b border-gray-200">60</td>
+                            <td class="p-3 text-center border-b border-gray-200">0.00%</td>
+                            <td class="p-3 text-center border-b border-gray-200">0.00</td>
+                            <td class="p-3 text-center border-b border-gray-200">172.90</td>
+                            <td class="p-3 text-center border-b border-gray-200">63.66</td>
+                            <td class="p-3 text-center border-b border-gray-200">Z-score</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </section>
+            <!-- ============================================== -->
+<!-- === Outlier Visualisation Section === -->
+<!-- ============================================== -->
+<div id="outlier-visualisation" class="bg-white rounded-lg shadow p-6 mb-8">
+    <h2 id="Outlier-Visualisation" class="text-2xl font-semibold text-gray-800 mb-4">Outlier Visualisation</h2>
+    <p class="text-gray-600 mb-4">
+        This section visualizes the demand data for specific products and highlights any detected outliers. Use the dropdown below to select a product and view its corresponding time series data.
+    </p>
+
+    <!-- Dropdown for Product Selection -->
+    <div class="mb-4">
+        <label for="productSelect" class="block text-gray-700 text-sm font-bold mb-2">Select Product:</label>
+        <select id="productSelect" class="block appearance-none w-full bg-white border border-gray-400 hover:border-gray-500 px-4 py-2 pr-8 rounded shadow leading-tight focus:outline-none focus:shadow-outline">
+            <!-- Options will be populated by JavaScript -->
+        </select>
+    </div>
+
+    <!-- Chart Canvas -->
+    <div class="bg-gray-50 rounded-md p-4">
+        <canvas id="outlierChart" class="w-full h-80"></canvas>
+    </div>
+</div>
+<!-- ============================================== -->
+<!-- === Findings and Questionnaire Section === -->
+<!-- ============================================== -->
+<div id="findings-and-questionnaire" class="bg-white rounded-lg shadow p-6 mb-8">
+    <h2 class="text-2xl font-semibold text-gray-800 mb-4">Findings and Questionnaire</h2>
+    <p class="text-gray-600 mb-6">
+        Based on the outlier analysis, several key findings have been identified. The following table presents these findings along with specific questions to guide further investigation and gather crucial business context.
+    </p>
+
+    <!-- Table Container -->
+    <div class="overflow-x-auto rounded-lg border border-gray-200">
+        <table class="min-w-full divide-y divide-gray-200 table-auto">
+            <thead class="bg-gray-50">
+                <tr>
+                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        S. No.
+                    </th>
+                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Finding
+                    </th>
+                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Questionnaire
+                    </th>
+                </tr>
+            </thead>
+            <tbody class="bg-white divide-y divide-gray-200">
+                <!-- Finding 1 -->
+                <tr>
+                    <td class="px-6 py-4 whitespace-normal text-sm font-medium text-gray-900">
+                        1
+                    </td>
+                    <td class="px-6 py-4 whitespace-normal text-sm text-gray-700">
+                        Several COVID-period (2020–early 2021) outliers were observed across the following combinations: BR00–PG-N AMR, CB00–PG-ME, and EPDM–PG-PO3, EPDM–PG-TURKEY, EPDM–PG-S AMR—likely due to pandemic-related disruptions such as panic buying, shipment delays, or sudden shutdowns.
+                    </td>
+                    <td class="px-6 py-4 whitespace-normal text-sm text-gray-700">
+                        Were there any customer-specific bulk orders, contract closures, or emergency purchases during these outlier months?
+                    </td>
+                </tr>
+                <!-- Finding 2 -->
+                <tr>
+                    <td class="px-6 py-4 whitespace-normal text-sm font-medium text-gray-900">
+                        2
+                    </td>
+                    <td class="px-6 py-4 whitespace-normal text-sm text-gray-700">
+                        Many one-off demand spikes appear to be customer-linked (e.g., BR00–PG-CHINA Sep'23, EPDM–PG-PACIFIC Jul'24, EPDM–PG-N AMR in Dec'21 & Jan'22), suggesting sporadic bulk orders, contract closures, or single-client dependency leading to temporary demand shocks.
+                    </td>
+                    <td class="px-6 py-4 whitespace-normal text-sm text-gray-700">
+                        Are these groups driven by project-based demand cycles or irregular ordering patterns (e.g., quarterly/year-end procurement)?
+                    </td>
+                </tr>
+                <!-- Finding 3 -->
+                <tr>
+                    <td class="px-6 py-4 whitespace-normal text-sm font-medium text-gray-900">
+                        3
+                    </td>
+                    <td class="px-6 py-4 whitespace-normal text-sm text-gray-700">
+                        Groups like EPDM–PG-R AFRI, EPDM–PG-S AMR, EPDM–PG-SEA, and BR00–PGN AFRI show highly volatile or intermittent sales with long gaps followed by sharp spikes.
+                    </td>
+                    <td class="px-6 py-4 whitespace-normal text-sm text-gray-700">
+                        Did any pricing or market expansion strategy roll out in 2024 that could explain the rising outliers?
+                    </td>
+                </tr>
+                <!-- Finding 4 -->
+                <tr>
+                    <td class="px-6 py-4 whitespace-normal text-sm font-medium text-gray-900">
+                        4
+                    </td>
+                    <td class="px-6 py-4 whitespace-normal text-sm text-gray-700">
+                        Gradual demand growth observed in markets like EPDM–PG-ME and BR00–PG-SEA, with increasing outlier frequency in 2024, possibly indicating rising demand or market expansion.
+                    </td>
+                    <td class="px-6 py-4 whitespace-normal text-sm text-gray-700">
+                        Can we get clarity on customer-level contributions during these spikes—are these linked to one or two clients?
+                    </td>
+                </tr>
+                <!-- Finding 5 -->
+                <tr>
+                    <td class="px-6 py-4 whitespace-normal text-sm font-medium text-gray-900">
+                        5
+                    </td>
+                    <td class="px-6 py-4 whitespace-normal text-sm text-gray-700">
+                        Repeated outliers in a short window (2023–24) across certain groups (e.g., EPDM–PG-R AFRI, EPDM–PG-S AMR) indicate irregular bulk purchases or forecast inaccuracies.
+                    </td>
+                    <td class="px-6 py-4 whitespace-normal text-sm text-gray-700">
+                        Were any of the outliers due to data anomalies, shifted shipments, or manual booking overrides?
+                    </td>
+                </tr>
+                <!-- Finding 6 -->
+                <tr>
+                    <td class="px-6 py-4 whitespace-normal text-sm font-medium text-gray-900">
+                        6
+                    </td>
+                    <td class="px-6 py-4 whitespace-normal text-sm text-gray-700">
+                        Smaller markets (e.g., BR00–PG-R AFRI, BR00–PG-TURKEY) with low overall sales show high outlier ratios, implying extreme demand volatility.
+                    </td>
+                    <td class="px-6 py-4 whitespace-normal text-sm text-gray-700">
+                        Can you confirm whether the COVID-period demand fluctuations were influenced by specific strategic shifts or global constraints?
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<div class="container">
+        <h1 class="text-4xl font-extrabold text-center text-gray-900 mb-8">STL Decomposition Analysis</h1>
+        
+        <!-- Combined Trend Section -->
+        <section id="combined-trend" class="card mb-8">
+            <h2 class="section-title gradient-title">Combined Trend Component</h2>
+            <div class="chart-container">
+                <canvas id="combined-trend-chart"></canvas>
+            </div>
+        </section>
+
+        <!-- Combined Seasonality Section -->
+        <section id="combined-seasonality" class="card mb-8">
+            <h2 class="section-title gradient-title">Combined Seasonality Component</h2>
+            <div class="chart-container">
+                <canvas id="combined-seasonality-chart"></canvas>
+            </div>
+        </section>
+
+        <!-- Combined Residual Section -->
+        <section id="combined-residual" class="card mb-8">
+            <h2 class="section-title gradient-title">Combined Residual Component</h2>
+            <div class="chart-container">
+                <canvas id="combined-residual-chart"></canvas>
+            </div>
+        </section>
+    </div>
+
+     <!-- New Section: Product Group Trend & Seasonality Summary -->
+            <section class="bg-white p-6 rounded-lg shadow-md mb-6">
+                <h2 id="product-group-summary" class="text-2xl font-bold text-slate-800 mb-4">3. Product Group Trend & Seasonality Summary</h2>
+                <div class="overflow-x-auto">
+                    <table class="min-w-full divide-y divide-slate-200">
+                        <thead class="bg-slate-50">
+                            <tr>
+                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Product Group</th>
+                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Trend</th>
+                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Seasonality</th>
+                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Key Question</th>
+                            </tr>
+                        </thead>
+                        <tbody class="bg-white divide-y divide-slate-200">
+                            <tr>
+                                <td class="px-6 py-4 whitespace-normal text-sm text-slate-500 font-medium">BR00</td>
+                                <td class="px-6 py-4 whitespace-normal text-sm text-slate-500">Confirmed quantity steadily increased from ~3.6K (2020) to ~7.6K (2024), indicating strong long-term growth.</td>
+                                <td class="px-6 py-4 whitespace-normal text-sm text-slate-500">Stable peaks in Mar, May, Jul, Nov and troughs in Jan, Apr, Jun, Aug, Dec.</td>
+                                <td class="px-6 py-4 whitespace-normal text-sm text-slate-500">What’s driving BR00's sustained growth, and are peak months linked to industry cycles or specific customer segments?</td>
+                            </tr>
+                            <tr>
+                                <td class="px-6 py-4 whitespace-normal text-sm text-slate-500 font-medium">CB00</td>
+                                <td class="px-6 py-4 whitespace-normal text-sm text-slate-500">Sharp rise till mid-2021, then plateaued (2022–23) and declined slightly in 2024.</td>
+                                <td class="px-6 py-4 whitespace-normal text-sm text-slate-500">Peaks in Jan, May, Aug, Oct; troughs in Apr, Jun, Jul, Sep, Dec</td>
+                                <td class="px-6 py-4 whitespace-normal text-sm text-slate-500">What caused CB00's rapid rise and later stagnation—was it market saturation, capacity limit, or demand shift?</td>
+                            </tr>
+                            <tr>
+                                <td class="px-6 py-4 whitespace-normal text-sm text-slate-500 font-medium">EPDM</td>
+                                <td class="px-6 py-4 whitespace-normal text-sm text-slate-500">Strong and consistent upward trend from ~2.9K (2020) to ~6.7K (2024).</td>
+                                <td class="px-6 py-4 whitespace-normal text-sm text-slate-500">Peaks in Mar, May, June, Oct; troughs in Jan, Feb, May, Aug, Nov, Dec.</td>
+                                <td class="px-6 py-4 whitespace-normal text-sm text-slate-500">Is EPDM growth driven by sectoral demand (e.g., auto, construction), and how do cyclical peaks reflect customer behavior?</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+            <!-- Sales Analysis Section -->
+            <section id="sales-analysis" class="card">
+                <h2 class="section-title gradient-title">3. Sales Analysis</h2>
+                <h3 class="sub-section-title" id="analysis-by-product-hierarchy">3.1 Analysis of Sales by Product Hierarchy</h3>
+                
+                <h4 class="sub-section-title" id="sales-over-years">3.1.1 Sales of elastomers over the years</h4>
+                <p class="text-lg text-gray-700 mb-4">
+                    The following line chart illustrates the sales trend of elastomers from 2020 to 2024. The data shows a general upward trend with a slight dip in the most recent year.
+                </p>
+                <div class="chart-container">
+                    <canvas id="salesChart"></canvas>
+                </div>
+                <h3 class="sub-section-title" id="sales-by-product-hierarchy">3.1.2 What is the contribution of Sales by volume and revenue for different product hierarchical level?</h3>
+                <p class="text-gray-700 mb-4">
+                This section visualizes the contribution of sales by volume (in metric tons, mT) and revenue (in USD) across different product hierarchical levels. Use the dropdown to switch between SKU, Grade, Product Application, Product Group, and Product Family.
+            </p>
+
+            <div class="mb-4">
+                <label for="productHierarchySelect" class="block text-sm font-medium text-gray-700 mb-2">Select Product Hierarchy Level:</label>
+                <select id="productHierarchySelect" class="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-600 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm rounded-md bg-gray-700 text-white shadow-sm">
+                    <option value="Sku">SKU</option>
+                    <option value="Grade">Grade</option>
+                    <option value="Product Application">Product Application</option>
+                    <option value="Product Group">Product Group</option>
+                    <option value="Product Family">Product Family</option>
+                </select>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
+                <div class="card">
+                    <h3 class="sub-section-title text-center">Contribution by Volume (mT)</h3>
+                    <div class="chart-container-small">
+                        <canvas id="volumeContributionChart"></canvas>
+                    </div>
+                </div>
+                <div class="card">
+                    <h3 class="sub-section-title text-center">Contribution by Revenue ($)</h3>
+                    <div class="chart-container-small">
+                        <canvas id="revenueContributionChart"></canvas>
+                    </div>
+                </div>
+            </div>
+            <!-- New table for Sales Contribution Data -->
+            <div class="card mt-6">
+                <h3 class="sub-section-title text-center">Sales Contribution Data Table</h3>
+                <table id="salesContributionTable" class="styled-table">
+                    <thead>
+                        <tr>
+                            <th>Category</th>
+                            <th>Volume (mT)</th>
+                            <th>Volume (%)</th>
+                            <th>Revenue ($)</th>
+                            <th>Revenue (%)</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <!-- Table rows will be populated by JavaScript -->
+                    </tbody>
+                </table>
+            </div>
+            </section>
+
+        </main>
+    </div>
+
+    
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const sidebar = document.getElementById('sidebar');
+            const toggleButton = document.getElementById('sidebar-toggle');
+            const closeButton = document.getElementById('close-sidebar-btn');
+            const mainContent = document.getElementById('main-content-wrapper');
+            const tocList = document.getElementById('toc-list');
+            const sections = document.querySelectorAll('main section');
+
+            // === Outlier Visualisation Chart and Logic ===
+            const outlierData = {
+                "BR00$$PG-CIS": {
+                    "data": [
+                        {"x": "2024-10", "y": 1.26}
+                    ],
+                    "outliers": []
+                },
+                "BR00$$PG-EGYPT": {
+                    "data": [
+                        {"x": "2021-07", "y": 20.16},
+                        {"x": "2023-11", "y": 20.16},
+                        {"x": "2023-12", "y": 0.0},
+                        {"x": "2024-01", "y": 0.0},
+                        {"x": "2024-02", "y": 0.0},
+                        {"x": "2024-03", "y": 0.0},
+                        {"x": "2024-04", "y": 0.0},
+                        {"x": "2024-05", "y": 0.0},
+                        {"x": "2024-06", "y": 0.0},
+                        {"x": "2024-07", "y": 0.0},
+                        {"x": "2024-08", "y": 0.0},
+                        {"x": "2024-09", "y": 0.0},
+                        {"x": "2024-10", "y": 20.16}
+                    ],
+                    "outliers": []
+                }
+            };
+
+            let outlierChartInstance = null;
+
+            function updateOutlierChart(productKey) {
+                const productData = outlierData[productKey];
+                if (!productData) return;
+
+                const dataPoints = productData.data.map(d => ({
+                    x: d.x,
+                    y: d.y
+                }));
+                
+                const datasets = [{
+                    label: 'Demand',
+                    data: dataPoints,
+                    borderColor: 'rgb(59, 130, 246)',
+                    backgroundColor: 'rgba(59, 130, 246, 0.2)',
+                    borderWidth: 2,
+                    tension: 0.3,
+                    pointRadius: 4,
+                    pointHoverRadius: 6,
+                    fill: true,
+                }];
+
+                if (productData.outliers.length > 0) {
+                    const outlierPoints = productData.outliers.map(d => ({
+                        x: d.x,
+                        y: d.y
+                    }));
+                    datasets.push({
+                        label: 'Outlier',
+                        data: outlierPoints,
+                        borderColor: 'rgb(239, 68, 68)',
+                        backgroundColor: 'rgb(239, 68, 68)',
+                        pointRadius: 8,
+                        pointHoverRadius: 10,
+                        showLine: false,
+                        type: 'scatter'
+                    });
+                }
+
+                const chartConfig = {
+                    type: 'line',
+                    data: {
+                        datasets: datasets
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                position: 'top',
+                            },
+                            tooltip: {
+                                callbacks: {
+                                    label: function(context) {
+                                        let label = context.dataset.label || '';
+                                        if (label) {
+                                            label += ': ';
+                                        }
+                                        if (context.parsed.y !== null) {
+                                            label += new Intl.NumberFormat('en-US').format(context.parsed.y);
+                                        }
+                                        return label;
+                                    }
+                                }
+                            },
+                        },
+                        scales: {
+                            x: {
+                                type: 'time',
+                                time: {
+                                    unit: 'month',
+                                    tooltipFormat: 'MMM yyyy'
+                                },
+                                title: {
+                                    display: true,
+                                    text: 'Date',
+                                    font: { weight: 'bold' }
+                                },
+                                grid: {
+                                    display: false
+                                }
+                            },
+                            y: {
+                                beginAtZero: true,
+                                title: {
+                                    display: true,
+                                    text: 'Demand (in units)',
+                                    font: { weight: 'bold' }
+                                }
+                            }
+                        }
+                    }
+                };
+
+                if (outlierChartInstance) {
+                    outlierChartInstance.destroy();
+                }
+
+                const outlierCtx = document.getElementById('outlierChart').getContext('2d');
+                outlierChartInstance = new Chart(outlierCtx, chartConfig);
+            }
+
+            const productSelect = document.getElementById('productSelect');
+            if (productSelect) {
+                Object.keys(outlierData).forEach(key => {
+                    const option = document.createElement('option');
+                    option.value = key;
+                    option.textContent = key;
+                    productSelect.appendChild(option);
+                });
+
+                productSelect.addEventListener('change', (event) => {
+                    updateOutlierChart(event.target.value);
+                });
+
+                if (Object.keys(outlierData).length > 0) {
+                    updateOutlierChart(Object.keys(outlierData)[0]);
+                }
+            }
+
+            const salesData = {
+                labels: ["2020-01", "2020-02", "2020-03", "2020-04", "2020-05", "2020-06", "2020-07", "2020-08", "2020-09", "2020-10", "2020-11", "2020-12", "2021-01", "2021-02", "2021-03", "2021-04", "2021-05", "2021-06", "2021-07", "2021-08", "2021-09", "2021-10", "2021-11", "2021-12", "2022-01", "2022-02", "2022-03", "2022-04", "2022-05", "2022-06", "2022-07", "2022-08", "2022-09", "2022-10", "2022-11", "2022-12", "2023-01", "2023-02", "2023-03", "2023-04", "2023-05", "2023-06", "2023-07", "2023-08", "2023-09", "2023-10", "2023-11", "2023-12", "2024-01", "2024-02", "2024-03", "2024-04", "2024-05", "2024-06", "2024-07", "2024-08", "2024-09", "2024-10", "2024-11", "2024-12"],
+                'BR00': {
+                    name: 'BR00',
+                    color: '#FF6384',
+                    trend: [3688.26, 3867.44, 4038.73, 4202.23, 4358.26, 4508.23, 4654.72, 4800.16, 4946.46, 5092.61, 5215.15, 5204.75, 5137.91, 5055.34, 4998.18, 4999.53, 5063.71, 5181.53, 5336.49, 5510.30, 5695.92, 5881.81, 6067.64, 6256.46, 6453.50, 6659.32, 6842.16, 6973.95, 7063.61, 7124.55, 7155.88, 7153.73, 7126.56, 7093.52, 7075.61, 7089.53, 7142.13, 7220.01, 7289.38, 7311.45, 7272.69, 7182.17, 7068.21, 6966.42, 6887.73, 6846.44, 6844.61, 6852.56, 6834.68, 6788.64, 6821.09, 6896.03, 6996.19, 7112.62, 7240.28, 7375.36, 7515.51, 7659.55, 7807.46, 7960.32],
+                    seasonality: [-969.90, -46.64, 2174.59, -1935.79, 1102.62, -1476.59, 444.88, -1252.85, -687.91, 1042.51, 1960.05, -615.40, -721.38, -270.68, 1659.26, -1246.52, 957.00, -1077.61, 535.82, -1380.44, -297.13, 972.43, 1414.46, -722.51, -528.48, -567.80, 1139.42, -528.69, 795.75, -598.26, 630.75, -1513.00, 98.35, 835.08, 901.47, -754.89, -436.40, -962.95, 637.25, 171.80, 573.78, 50.98, 776.22, -1612.40, 502.55, 549.13, 454.84, -725.95, -387.62, -1394.43, 123.25, 821.59, 314.58, 795.17, 972.07, -1678.26, 946.50, 186.24, 46.54, -689.17],
+                    residual: [-796.86, -345.72, 279.46, -1108.50, -793.84, 2461.96, 1245.76, 1086.97, 811.69, -1531.41, 1008.50, -178.10, 560.40, -578.78, -1006.34, 2738.51, 971.03, -1486.90, -3761.62, -2657.87, -673.78, 834.28, -1066.18, 1667.82, 366.16, 1327.36, 1705.30, 308.34, 205.00, -1366.60, -561.78, 426.17, -1440.21, 1657.48, -215.49, -1215.26, 1596.41, 1704.88, -926.07, -3255.95, 266.68, -649.65, 1062.51, 4924.68, 2440.24, 712.64, -390.87, -2076.97, -1487.70, -1869.99, 145.68, 718.26, -515.98, 1385.97, -245.37, -303.15, -598.35, -1581.07, 532.56, 1585.39],
+                },
+                'CB00': {
+                    name: 'CB00',
+                    color: '#36A2EB',
+                    trend: [745.94, 843.42, 940.11, 1036.08, 1131.26, 1225.57, 1318.91, 1411.06, 1501.58, 1589.53, 1671.58, 1737.12, 1796.39, 1850.84, 1900.31, 1940.95, 1970.18, 1991.74, 2008.57, 2018.39, 2023.21, 2026.53, 2028.95, 2024.75, 2014.67, 2001.67, 1982.35, 1957.42, 1935.39, 1929.06, 1941.73, 1967.42, 1996.38, 2023.76, 2049.71, 2073.90, 2092.06, 2106.40, 2117.68, 2119.16, 2101.41, 2061.60, 2006.09, 1941.17, 1875.03, 1812.01, 1756.29, 1709.94, 1674.69, 1650.77, 1661.09, 1679.54, 1701.89, 1727.11, 1754.77, 1784.51, 1816.22, 1849.83, 1885.21, 1922.35],
+                    seasonality: [741.52, 639.77, -30.21, -703.27, 1991.20, -1202.62, -886.91, 28.66, -93.77, -386.00, 663.64, -581.51, 608.65, 519.87, -72.85, -466.49, 1426.91, -907.11, -657.34, -110.11, 48.05, -226.28, 482.75, -445.49, 466.10, 393.55, -123.99, -227.51, 859.27, -604.19, -438.13, -241.66, 197.00, -67.06, 306.47, -292.96, 298.32, 262.82, -175.95, 3.48, 288.90, -289.27, -231.18, -374.13, 354.41, 88.93, 134.85, -121.43, 119.99, 130.27, -221.80, 231.46, -284.51, 28.84, -26.98, -507.99, 512.60, 250.75, -35.07, 59.10],
+                    residual: [-252.46, 57.81, 191.04, -114.81, -2782.47, 72.05, 32.00, -66.71, 55.17, 80.46, 44.77, 135.39, 488.00, -164.69, -452.46, 705.54, -30.09, 1865.37, -191.23, 831.72, 30.74, 1543.75, -1841.70, 130.74, -110.77, 163.78, 1153.64, -377.91, 63.34, -4.87, 197.40, -248.76, -1233.38, -306.70, -1244.19, -447.79, 491.82, 172.79, 478.47, 207.51, 44.34, -229.03, 321.03, 1419.86, -222.43, 492.45, -115.94, -206.02, -306.68, -175.73, -242.94, -86.00, -66.87, 145.85, -309.14, 32.58, 126.27, -162.43, 53.02, 274.55],
+                },
+                'EPDM': {
+                    name: 'EPDM',
+                    color: '#FFCE56',
+                    trend: [2476.32, 2540.02, 2601.25, 2659.87, 2715.90, 2769.38, 2820.66, 2869.99, 2917.14, 2960.54, 2991.88, 2957.14, 2899.84, 2830.05, 2761.86, 2708.94, 2669.14, 2633.16, 2591.79, 2545.34, 2500.38, 2469.04, 2459.38, 2469.87, 2495.14, 2529.74, 2573.39, 2622.44, 2677.39, 2738.74, 2809.77, 2895.77, 2999.23, 3115.99, 3235.82, 3350.97, 3459.03, 3560.33, 3650.11, 3723.03, 3780.48, 3827.15, 3863.65, 3887.53, 3893.00, 3881.01, 3860.69, 3843.81, 3838.08, 3844.30, 3878.86, 3916.81, 3955.52, 3995.27, 4036.59, 4079.81, 4124.93, 4171.83, 4220.41, 4270.62],
+                    seasonality: [-926.82, -999.17, 880.14, 314.01, -492.50, 802.48, 22.22, -525.92, 182.33, 2031.87, 139.09, -1341.25, -743.46, -867.97, 632.70, 308.87, -201.45, 374.00, -46.32, -565.69, 169.91, 1524.30, 106.35, -602.92, -550.90, -728.00, 381.04, 287.36, 73.77, -54.72, -99.60, -597.03, 152.94, 1016.40, 73.29, 148.39, -353.26, -587.72, 110.29, 256.42, 305.00, -473.81, -119.44, -607.63, 144.07, 508.32, 20.94, 904.59, -154.86, -453.32, -163.49, 221.72, 511.73, -878.27, -117.84, -610.92, 142.35, 0.75, -42.13, 1653.92],
+                    residual: [-78.77, -193.33, -150.33, 119.27, -480.30, 356.03, 498.77, 248.28, 286.13, 34.64, -304.59, -198.99, 483.95, 955.66, 1167.81, -795.46, 1036.81, -383.03, -277.74, -290.83, -865.74, -1598.16, 824.49, 588.78, -471.64, -186.50, -494.10, 659.01, 97.65, -345.29, -609.95, 83.76, 170.83, -2198.82, -164.66, -67.93, -70.98, -290.96, 979.50, 224.38, 334.00, 875.93, 54.74, -293.00, 148.93, 31.84, 71.92, -798.55, 157.51, 193.90, -232.55, -310.03, -411.09, -152.50, 225.55, 216.81, -100.39, -29.78, -90.39, 312.20],
+                },
+            };
+
+            function createMultiLineChart(canvasId, title, labels, datasets, yAxisTitle) {
+                const canvas = document.getElementById(canvasId);
+                if (!canvas) {
+                    console.error(`Canvas element with ID '${canvasId}' not found.`);
+                    return;
+                }
+                const ctx = canvas.getContext('2d');
+                new Chart(ctx, {
+                    type: 'line',
+                    data: {
+                        labels: labels,
+                        datasets: datasets.map(d => ({
+                            label: d.name,
+                            data: d.data,
+                            borderColor: d.color,
+                            borderWidth: 2,
+                            fill: false,
+                            tension: 0.1,
+                            pointRadius: 0
+                        }))
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: { display: true, position: 'top', labels: { color: '#475569', font: { size: 14, weight: 'bold' } } },
+                            title: { display: true, text: title, font: { size: 16, weight: 'bold' }, color: '#334155' },
+                            tooltip: {
+                                callbacks: {
+                                    title: function(context) { return 'Date: ' + context[0].label; },
+                                    label: function(context) { return `${context.dataset.label}: ${context.parsed.y.toFixed(2)}`; }
+                                }
+                            }
+                        },
+                        scales: {
+                            x: { type: 'time', time: { unit: 'month' }, title: { display: true, text: 'Date', color: '#475569' }, ticks: { color: '#64748b' }, grid: { color: '#e2e8f0' } },
+                            y: { title: { display: true, text: yAxisTitle, color: '#475569' }, ticks: { color: '#64748b' }, grid: { color: '#e2e8f0' } }
+                        }
+                    }
+                });
+            }
+
+            function renderCombinedCharts(labels, data) {
+                const productCodes = ['BR00', 'CB00', 'EPDM'];
+                const trendDatasets = productCodes.map(code => ({ name: data[code].name, data: data[code].trend, color: data[code].color }));
+                const seasonalityDatasets = productCodes.map(code => ({ name: data[code].name, data: data[code].seasonality, color: data[code].color }));
+                const residualDatasets = productCodes.map(code => ({ name: data[code].name, data: data[code].residual, color: data[code].color }));
+
+                createMultiLineChart('combined-trend-chart', 'Combined Trend Component', labels, trendDatasets, 'Trend Value');
+                createMultiLineChart('combined-seasonality-chart', 'Combined Seasonality Component', labels, seasonalityDatasets, 'Seasonal Effect');
+                createMultiLineChart('combined-residual-chart', 'Combined Residual Component', labels, residualDatasets, 'Residual Value');
+            }
+
+            renderCombinedCharts(salesData.labels, salesData);
+
+            toggleButton.addEventListener('click', () => {
+                sidebar.classList.toggle('w-0');
+                sidebar.classList.toggle('w-64');
+            });
+
+            closeButton.addEventListener('click', () => {
+                sidebar.classList.remove('w-64');
+                sidebar.classList.add('w-0');
+            });
+
+            tocList.innerHTML = ''; 
+            sections.forEach(section => {
+                const sectionId = section.id;
+                const h2Element = section.querySelector('h2');
+                if (h2Element) {
+                    const h2Id = h2Element.id || `${sectionId}-h2`;
+                    h2Element.id = h2Id; 
+                    const h2Item = document.createElement('li');
+                    h2Item.className = 'my-2';
+                    const h2Link = document.createElement('a');
+                    h2Link.href = `#${h2Id}`;
+                    h2Link.className = 'flex items-center justify-between p-2 rounded-lg hover:bg-gray-700 transition duration-150 ease-in-out';
+                    h2Link.textContent = h2Element.textContent;
+                    h2Item.appendChild(h2Link);
+                    const h3Elements = section.querySelectorAll('h3');
+                    if (h3Elements.length > 0) {
+                        const arrow = document.createElement('span');
+                        arrow.className = 'toc-arrow transform transition-transform duration-200';
+                        arrow.innerHTML = '&#9654;';
+                        h2Link.appendChild(arrow);
+                        h2Link.className += ' cursor-pointer';
+                        const nestedList = document.createElement('ul');
+                        nestedList.className = 'toc-nested-list ml-4 mt-1 space-y-1 collapsed';
+                        h3Elements.forEach(h3Element => {
+                            const h3Id = h3Element.id || `${sectionId}-${h3Element.textContent.replace(/\s/g, '-').toLowerCase()}`;
+                            h3Element.id = h3Id;
+                            const h3Item = document.createElement('li');
+                            h3Item.innerHTML = `<a href="#${h3Id}" class="block p-2 rounded-lg hover:bg-gray-700 transition duration-150 ease-in-out text-sm">└ ${h3Element.textContent}</a>`;
+                            nestedList.appendChild(h3Item);
+                        });
+                        h2Item.appendChild(nestedList);
+                        h2Link.addEventListener('click', (e) => {
+                            e.preventDefault(); 
+                            nestedList.classList.toggle('collapsed');
+                            arrow.classList.toggle('rotated');
+                        });
+                    }
+                    tocList.appendChild(h2Item);
+                }
+            });
+
+            const elastomerSalesData = {
+                labels: ['2020', '2021', '2022', '2023', '2024'],
+                datasets: [{
+                    label: 'Sales (in K)',
+                    data: [102.74, 119.72, 137.24, 163.67, 153.70],
+                    borderColor: '#00A6FB',
+                    backgroundColor: 'rgba(0, 166, 251, 0.2)',
+                    fill: true,
+                    tension: 0.4
+                }]
+            };
+            const salesConfig = {
+                type: 'line',
+                data: elastomerSalesData,
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { position: 'top', labels: { color: '#334155' } },
+                        title: { display: true, text: 'Sales of Elastomers Over the Years', color: '#1e293b', font: { size: 18, weight: 'bold' } }
+                    },
+                    scales: {
+                        x: { title: { display: true, text: 'Year', color: '#334155' }, ticks: { color: '#334155' }, grid: { color: '#e2e8f0' } },
+                        y: { title: { display: true, text: 'Total Sales (K)', color: '#334155' }, ticks: { color: '#334155' }, grid: { color: '#e2e8f0' } }
+                    }
+                }
+            };
+            const salesChartCtx = document.getElementById('salesChart');
+            if (salesChartCtx) {
+                new Chart(salesChartCtx, salesConfig);
+            }
+
+            const contributionData = {
+                "Sku": {
+                    volume: { labels: ["22010715", "22010693", "22010697", "22010712", "22010703", "22096892", "22012980", "22202714", "22096887", "22200721", "Other"], data: [266111.65, 66506.1, 61812.08, 64539.72, 40918.98, 40950.0, 18102.42, 15836.94, 20772.05, 17914.7, 108609.26], percentage: [39.3, 9.82, 9.13, 9.53, 6.04, 6.05, 2.67, 2.34, 3.07, 2.65, 9.4] },
+                    revenue: { labels: ["22010715", "22010693", "22010697", "22010712", "22010703", "22096892", "22012980", "22202714", "22096887", "22200721", "Other"], data: [423627497.85, 151632618.91, 131726159.91, 98541787.1, 92115651.88, 35294761.9, 28310727.37, 26059096.89, 19493564.35, 18573506.02, 105188444.12], percentage: [37.73, 13.51, 11.73, 8.78, 8.2, 3.14, 2.52, 2.32, 1.74, 1.65, 8.58] }
+                },
+                "Grade": {
+                    volume: { labels: ["BR4610", "EPDM657", "EPDM756", "BR5510", "EPDM626", "EPDM855", "CCCN339", "CCCN220", "N330", "EPDM245", "Other"], data: [300051.01, 66506.1, 61812.08, 73141.74, 40918.98, 16868.19, 44366.0, 24070.05, 17914.7, 5314.1, 63712.95], percentage: [44.32, 9.82, 9.13, 10.8, 6.04, 2.49, 6.55, 3.56, 2.65, 0.78, 3.86] },
+                    revenue: { labels: ["BR4610", "EPDM657", "EPDM756", "BR5510", "EPDM626", "EPDM855", "CCCN339", "CCCN220", "N330", "EPDM245", "Other"], data: [477997322.1, 151632618.91, 131726159.91, 113706095.18, 92115651.88, 38149525.66, 37926236.9, 22480584.35, 18573506.02, 13150878.56, 91392686.83], percentage: [42.57, 13.51, 11.73, 10.13, 8.2, 3.4, 3.38, 2.0, 1.65, 1.17, 1.26] }
+                },
+                "Product Application": {
+                    volume: { labels: ["NI00", "CRYS", "HARD", "AMOR", "GYT0", "Other"], data: [352585.31, 169237.16, 108626.69, 22182.29, 24438.96, 4.5], percentage: [52.07, 25.0, 16.04, 3.28, 3.61, 0.0] },
+                    revenue: { labels: ["NI00", "CRYS", "HARD", "AMOR", "GYT0", "Other"], data: [554734139.67, 375474430.7, 100001071.34, 51300404.22, 41223404.97, 8415.41], percentage: [49.41, 33.44, 8.91, 4.57, 3.67, 0.0] }
+                },
+                "Product Group": {
+                    volume: { labels: ["BR00", "EPDM", "CB00"], data: [377024.27, 191423.95, 108626.69], percentage: [55.68, 28.27, 16.04] },
+                    revenue: { labels: ["BR00", "EPDM", "CB00"], data: [595957544.63, 426783250.33, 100001071.34], percentage: [53.08, 38.01, 8.91] }
+                },
+                "Product Family": {
+                    volume: { labels: ["SR"], data: [677074.9], percentage: [100.0] },
+                    revenue: { labels: ["SR"], data: [1122741866.3], percentage: [100.0] }
+                }
+            };
+
+            let volumeChartInstance = null;
+            let revenueChartInstance = null;
+
+            function renderContributionCharts(hierarchyLevel) {
+                const data = contributionData[hierarchyLevel];
+                if (!data) { console.error("Data for selected hierarchy level not found."); return; }
+
+                const volumeChartCtx = document.getElementById('volumeContributionChart').getContext('2d');
+                const revenueChartCtx = document.getElementById('revenueContributionChart').getContext('2d');
+                const tableBody = document.getElementById('salesContributionTable').querySelector('tbody');
+
+                if (volumeChartInstance) volumeChartInstance.destroy();
+                if (revenueChartInstance) revenueChartInstance.destroy();
+                
+                const backgroundColors = data.volume.labels.map((_, i) => `hsl(${i * 360 / data.volume.labels.length}, 70%, 50%)`);
+                const borderColors = data.volume.labels.map(() => '#FFFFFF');
+
+                volumeChartInstance = new Chart(volumeChartCtx, {
+                    type: 'doughnut',
+                    data: {
+                        labels: data.volume.labels,
+                        datasets: [{ label: 'Contribution by Volume (mT)', data: data.volume.data, backgroundColor: backgroundColors, borderColor: borderColors, borderWidth: 1 }]
+                    },
+                    options: {
+                        responsive: true, maintainAspectRatio: false,
+                        plugins: {
+                            legend: { position: 'bottom' },
+                            tooltip: {
+                                callbacks: {
+                                    label: function(context) {
+                                        const label = context.label || '';
+                                        const value = context.parsed;
+                                        const percentage = data.volume.percentage[context.dataIndex];
+                                        return `${label}: ${value.toLocaleString()} mT (${percentage}%)`;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                });
+
+                revenueChartInstance = new Chart(revenueChartCtx, {
+                    type: 'doughnut',
+                    data: {
+                        labels: data.revenue.labels,
+                        datasets: [{ label: 'Contribution by Revenue ($)', data: data.revenue.data, backgroundColor: backgroundColors, borderColor: borderColors, borderWidth: 1 }]
+                    },
+                    options: {
+                        responsive: true, maintainAspectRatio: false,
+                        plugins: {
+                            legend: { position: 'bottom' },
+                            tooltip: {
+                                callbacks: {
+                                    label: function(context) {
+                                        const label = context.label || '';
+                                        const value = context.parsed;
+                                        const percentage = data.revenue.percentage[context.dataIndex];
+                                        return `${label}: $${value.toLocaleString()} (${percentage}%)`;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                });
+
+                tableBody.innerHTML = '';
+                data.volume.labels.forEach((label, index) => {
+                    const row = document.createElement('tr');
+                    row.innerHTML = `
+                        <td>${label}</td>
+                        <td>${data.volume.data[index].toLocaleString()}</td>
+                        <td>${data.volume.percentage[index]}%</td>
+                        <td>$${data.revenue.data[index].toLocaleString()}</td>
+                        <td>${data.revenue.percentage[index]}%</td>
+                    `;
+                    tableBody.appendChild(row);
+                });
+            }
+
+            const productHierarchySelect = document.getElementById('productHierarchySelect');
+            if (productHierarchySelect) {
+                productHierarchySelect.addEventListener('change', (event) => {
+                    renderContributionCharts(event.target.value);
+                });
+                renderContributionCharts(productHierarchySelect.value);
+            }
+
+            tocList.addEventListener('click', (e) => {
+                if (e.target.tagName === 'A' && !e.target.querySelector('.toc-arrow')) {
+                    e.preventDefault();
+                    const targetId = e.target.getAttribute('href').substring(1);
+                    const targetElement = document.getElementById(targetId);
+                    if (targetElement) {
+                        targetElement.scrollIntoView({ behavior: 'smooth' });
+                        if (window.innerWidth < 768) {
+                            sidebar.classList.remove('w-64');
+                            sidebar.classList.add('w-0');
+                        }
+                    }
+                }
+            });
+        });
+    </script>
+</body>
+</html>
