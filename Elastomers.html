@@ -12,6 +12,13 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- In your <head> section -->
+        <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.2/dist/chart.umd.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/luxon@2.3.0/build/global/luxon.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@3.7.0/dist/chart.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-luxon@1.1.0/dist/chartjs-adapter-luxon.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.0.0"></script>
     <style>
         body {
             font-family: 'Inter', sans-serif;
@@ -19,6 +26,94 @@
             color: #334155;
             line-height: 1.6;
             transition: background-color 0.3s ease, color 0.3s ease;
+        }
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f0f4f8;
+            color: #334155;
+            line-height: 1.6;
+        }
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f3f4f6;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+        .card {
+            background-color: white;
+            border-radius: 0.5rem;
+            padding: 1.5rem;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            transition: transform 0.2s;
+        }
+        .card:hover {
+            transform: translateY(-5px);
+        }
+        .sub-section-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: #1f2937;
+            margin-bottom: 1rem;
+        }
+        .chart-container-small {
+            position: relative;
+            height: 300px;
+            width: 100%;
+        }
+        .styled-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.9rem;
+            text-align: left;
+        }
+        .styled-table thead tr {
+            background-color: #4b5563;
+            color: #ffffff;
+            text-align: left;
+        }
+        .styled-table th,
+        .styled-table td {
+            padding: 12px 15px;
+        }
+        .styled-table tbody tr {
+            border-bottom: 1px solid #e5e7eb;
+        }
+        .styled-table tbody tr:nth-of-type(even) {
+            background-color: #f3f4f6;
+        }
+        .styled-table tbody tr:last-of-type {
+            border-bottom: 2px solid #4b5563;
+        }
+        .card {
+            background-color: #ffffff;
+            border-radius: 1rem;
+            padding: 2rem;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+        }
+        .gradient-title {
+            background-image: linear-gradient(90deg, #1d4ed8, #2563eb);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+            font-weight: 700;
+        }
+        .section-title {
+            font-size: 1.875rem;
+            line-height: 2.25rem;
+            margin-bottom: 1.5rem;
+        }
+        .container {
+            max-width: 1280px;
+            margin: auto;
+            padding: 2rem;
+        }
+        .chart-container {
+            position: relative;
+            height: 400px; /* Fixed height for consistent chart display */
         }
 
         .toc-nested-list.collapsed {
@@ -1326,8 +1421,261 @@
                     </tbody>
                 </table>
             </section>
+            <!-- ============================================== -->
+<!-- === Outlier Visualisation Section === -->
+<!-- ============================================== -->
+<div id="outlier-visualisation" class="bg-white rounded-lg shadow p-6 mb-8">
+    <h2 id="Outlier-Visualisation" class="text-2xl font-semibold text-gray-800 mb-4">Outlier Visualisation</h2>
+    <p class="text-gray-600 mb-4">
+        This section visualizes the demand data for specific products and highlights any detected outliers. Use the dropdown below to select a product and view its corresponding time series data.
+    </p>
+
+    <!-- Dropdown for Product Selection -->
+    <div class="mb-4">
+        <label for="productSelect" class="block text-gray-700 text-sm font-bold mb-2">Select Product:</label>
+        <select id="productSelect" class="block appearance-none w-full bg-white border border-gray-400 hover:border-gray-500 px-4 py-2 pr-8 rounded shadow leading-tight focus:outline-none focus:shadow-outline">
+            <!-- Options will be populated by JavaScript -->
+        </select>
+    </div>
+
+    <!-- Chart Canvas -->
+    <div class="bg-gray-50 rounded-md p-4">
+        <canvas id="outlierChart" class="w-full h-80"></canvas>
+    </div>
+</div>
+<!-- ============================================== -->
+<!-- === Findings and Questionnaire Section === -->
+<!-- ============================================== -->
+<div id="findings-and-questionnaire" class="bg-white rounded-lg shadow p-6 mb-8">
+    <h2 class="text-2xl font-semibold text-gray-800 mb-4">Findings and Questionnaire</h2>
+    <p class="text-gray-600 mb-6">
+        Based on the outlier analysis, several key findings have been identified. The following table presents these findings along with specific questions to guide further investigation and gather crucial business context.
+    </p>
+
+    <!-- Table Container -->
+    <div class="overflow-x-auto rounded-lg border border-gray-200">
+        <table class="min-w-full divide-y divide-gray-200 table-auto">
+            <thead class="bg-gray-50">
+                <tr>
+                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        S. No.
+                    </th>
+                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Finding
+                    </th>
+                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Questionnaire
+                    </th>
+                </tr>
+            </thead>
+            <tbody class="bg-white divide-y divide-gray-200">
+                <!-- Finding 1 -->
+                <tr>
+                    <td class="px-6 py-4 whitespace-normal text-sm font-medium text-gray-900">
+                        1
+                    </td>
+                    <td class="px-6 py-4 whitespace-normal text-sm text-gray-700">
+                        Several COVID-period (2020–early 2021) outliers were observed across the following combinations: BR00–PG-N AMR, CB00–PG-ME, and EPDM–PG-PO3, EPDM–PG-TURKEY, EPDM–PG-S AMR—likely due to pandemic-related disruptions such as panic buying, shipment delays, or sudden shutdowns.
+                    </td>
+                    <td class="px-6 py-4 whitespace-normal text-sm text-gray-700">
+                        Were there any customer-specific bulk orders, contract closures, or emergency purchases during these outlier months?
+                    </td>
+                </tr>
+                <!-- Finding 2 -->
+                <tr>
+                    <td class="px-6 py-4 whitespace-normal text-sm font-medium text-gray-900">
+                        2
+                    </td>
+                    <td class="px-6 py-4 whitespace-normal text-sm text-gray-700">
+                        Many one-off demand spikes appear to be customer-linked (e.g., BR00–PG-CHINA Sep'23, EPDM–PG-PACIFIC Jul'24, EPDM–PG-N AMR in Dec'21 & Jan'22), suggesting sporadic bulk orders, contract closures, or single-client dependency leading to temporary demand shocks.
+                    </td>
+                    <td class="px-6 py-4 whitespace-normal text-sm text-gray-700">
+                        Are these groups driven by project-based demand cycles or irregular ordering patterns (e.g., quarterly/year-end procurement)?
+                    </td>
+                </tr>
+                <!-- Finding 3 -->
+                <tr>
+                    <td class="px-6 py-4 whitespace-normal text-sm font-medium text-gray-900">
+                        3
+                    </td>
+                    <td class="px-6 py-4 whitespace-normal text-sm text-gray-700">
+                        Groups like EPDM–PG-R AFRI, EPDM–PG-S AMR, EPDM–PG-SEA, and BR00–PGN AFRI show highly volatile or intermittent sales with long gaps followed by sharp spikes.
+                    </td>
+                    <td class="px-6 py-4 whitespace-normal text-sm text-gray-700">
+                        Did any pricing or market expansion strategy roll out in 2024 that could explain the rising outliers?
+                    </td>
+                </tr>
+                <!-- Finding 4 -->
+                <tr>
+                    <td class="px-6 py-4 whitespace-normal text-sm font-medium text-gray-900">
+                        4
+                    </td>
+                    <td class="px-6 py-4 whitespace-normal text-sm text-gray-700">
+                        Gradual demand growth observed in markets like EPDM–PG-ME and BR00–PG-SEA, with increasing outlier frequency in 2024, possibly indicating rising demand or market expansion.
+                    </td>
+                    <td class="px-6 py-4 whitespace-normal text-sm text-gray-700">
+                        Can we get clarity on customer-level contributions during these spikes—are these linked to one or two clients?
+                    </td>
+                </tr>
+                <!-- Finding 5 -->
+                <tr>
+                    <td class="px-6 py-4 whitespace-normal text-sm font-medium text-gray-900">
+                        5
+                    </td>
+                    <td class="px-6 py-4 whitespace-normal text-sm text-gray-700">
+                        Repeated outliers in a short window (2023–24) across certain groups (e.g., EPDM–PG-R AFRI, EPDM–PG-S AMR) indicate irregular bulk purchases or forecast inaccuracies.
+                    </td>
+                    <td class="px-6 py-4 whitespace-normal text-sm text-gray-700">
+                        Were any of the outliers due to data anomalies, shifted shipments, or manual booking overrides?
+                    </td>
+                </tr>
+                <!-- Finding 6 -->
+                <tr>
+                    <td class="px-6 py-4 whitespace-normal text-sm font-medium text-gray-900">
+                        6
+                    </td>
+                    <td class="px-6 py-4 whitespace-normal text-sm text-gray-700">
+                        Smaller markets (e.g., BR00–PG-R AFRI, BR00–PG-TURKEY) with low overall sales show high outlier ratios, implying extreme demand volatility.
+                    </td>
+                    <td class="px-6 py-4 whitespace-normal text-sm text-gray-700">
+                        Can you confirm whether the COVID-period demand fluctuations were influenced by specific strategic shifts or global constraints?
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<div class="container">
+        <h1 class="text-4xl font-extrabold text-center text-gray-900 mb-8">STL Decomposition Analysis</h1>
+        
+        <!-- Combined Trend Section -->
+        <section id="combined-trend" class="card mb-8">
+            <h2 class="section-title gradient-title">Combined Trend Component</h2>
+            <div class="chart-container">
+                <canvas id="combined-trend-chart"></canvas>
+            </div>
+        </section>
+
+        <!-- Combined Seasonality Section -->
+        <section id="combined-seasonality" class="card mb-8">
+            <h2 class="section-title gradient-title">Combined Seasonality Component</h2>
+            <div class="chart-container">
+                <canvas id="combined-seasonality-chart"></canvas>
+            </div>
+        </section>
+
+        <!-- Combined Residual Section -->
+        <section id="combined-residual" class="card mb-8">
+            <h2 class="section-title gradient-title">Combined Residual Component</h2>
+            <div class="chart-container">
+                <canvas id="combined-residual-chart"></canvas>
+            </div>
+        </section>
+    </div>
+
+     <!-- New Section: Product Group Trend & Seasonality Summary -->
+            <section class="bg-white p-6 rounded-lg shadow-md mb-6">
+                <h2 id="product-group-summary" class="text-2xl font-bold text-slate-800 mb-4">3. Product Group Trend & Seasonality Summary</h2>
+                <div class="overflow-x-auto">
+                    <table class="min-w-full divide-y divide-slate-200">
+                        <thead class="bg-slate-50">
+                            <tr>
+                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Product Group</th>
+                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Trend</th>
+                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Seasonality</th>
+                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Key Question</th>
+                            </tr>
+                        </thead>
+                        <tbody class="bg-white divide-y divide-slate-200">
+                            <tr>
+                                <td class="px-6 py-4 whitespace-normal text-sm text-slate-500 font-medium">BR00</td>
+                                <td class="px-6 py-4 whitespace-normal text-sm text-slate-500">Confirmed quantity steadily increased from ~3.6K (2020) to ~7.6K (2024), indicating strong long-term growth.</td>
+                                <td class="px-6 py-4 whitespace-normal text-sm text-slate-500">Stable peaks in Mar, May, Jul, Nov and troughs in Jan, Apr, Jun, Aug, Dec.</td>
+                                <td class="px-6 py-4 whitespace-normal text-sm text-slate-500">What’s driving BR00's sustained growth, and are peak months linked to industry cycles or specific customer segments?</td>
+                            </tr>
+                            <tr>
+                                <td class="px-6 py-4 whitespace-normal text-sm text-slate-500 font-medium">CB00</td>
+                                <td class="px-6 py-4 whitespace-normal text-sm text-slate-500">Sharp rise till mid-2021, then plateaued (2022–23) and declined slightly in 2024.</td>
+                                <td class="px-6 py-4 whitespace-normal text-sm text-slate-500">Peaks in Jan, May, Aug, Oct; troughs in Apr, Jun, Jul, Sep, Dec</td>
+                                <td class="px-6 py-4 whitespace-normal text-sm text-slate-500">What caused CB00's rapid rise and later stagnation—was it market saturation, capacity limit, or demand shift?</td>
+                            </tr>
+                            <tr>
+                                <td class="px-6 py-4 whitespace-normal text-sm text-slate-500 font-medium">EPDM</td>
+                                <td class="px-6 py-4 whitespace-normal text-sm text-slate-500">Strong and consistent upward trend from ~2.9K (2020) to ~6.7K (2024).</td>
+                                <td class="px-6 py-4 whitespace-normal text-sm text-slate-500">Peaks in Mar, May, June, Oct; troughs in Jan, Feb, May, Aug, Nov, Dec.</td>
+                                <td class="px-6 py-4 whitespace-normal text-sm text-slate-500">Is EPDM growth driven by sectoral demand (e.g., auto, construction), and how do cyclical peaks reflect customer behavior?</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+            <!-- Sales Analysis Section -->
+            <section id="sales-analysis" class="card">
+                <h2 class="section-title gradient-title">3. Sales Analysis</h2>
+                <h3 class="sub-section-title" id="analysis-by-product-hierarchy">3.1 Analysis of Sales by Product Hierarchy</h3>
+                
+                <h4 class="sub-section-title" id="sales-over-years">3.1.1 Sales of elastomers over the years</h4>
+                <p class="text-lg text-gray-700 mb-4">
+                    The following line chart illustrates the sales trend of elastomers from 2020 to 2024. The data shows a general upward trend with a slight dip in the most recent year.
+                </p>
+                <div class="chart-container">
+                    <canvas id="salesChart"></canvas>
+                </div>
+                <h3 class="sub-section-title" id="sales-by-product-hierarchy">3.1.2 What is the contribution of Sales by volume and revenue for different product hierarchical level?</h3>
+                <p class="text-gray-700 mb-4">
+                This section visualizes the contribution of sales by volume (in metric tons, mT) and revenue (in USD) across different product hierarchical levels. Use the dropdown to switch between SKU, Grade, Product Application, Product Group, and Product Family.
+            </p>
+
+            <div class="mb-4">
+                <label for="productHierarchySelect" class="block text-sm font-medium text-gray-700 mb-2">Select Product Hierarchy Level:</label>
+                <select id="productHierarchySelect" class="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-600 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm rounded-md bg-gray-700 text-white shadow-sm">
+                    <option value="Sku">SKU</option>
+                    <option value="Grade">Grade</option>
+                    <option value="Product Application">Product Application</option>
+                    <option value="Product Group">Product Group</option>
+                    <option value="Product Family">Product Family</option>
+                </select>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
+                <div class="card">
+                    <h3 class="sub-section-title text-center">Contribution by Volume (mT)</h3>
+                    <div class="chart-container-small">
+                        <canvas id="volumeContributionChart"></canvas>
+                    </div>
+                </div>
+                <div class="card">
+                    <h3 class="sub-section-title text-center">Contribution by Revenue ($)</h3>
+                    <div class="chart-container-small">
+                        <canvas id="revenueContributionChart"></canvas>
+                    </div>
+                </div>
+            </div>
+            <!-- New table for Sales Contribution Data -->
+            <div class="card mt-6">
+                <h3 class="sub-section-title text-center">Sales Contribution Data Table</h3>
+                <table id="salesContributionTable" class="styled-table">
+                    <thead>
+                        <tr>
+                            <th>Category</th>
+                            <th>Volume (mT)</th>
+                            <th>Volume (%)</th>
+                            <th>Revenue ($)</th>
+                            <th>Revenue (%)</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <!-- Table rows will be populated by JavaScript -->
+                    </tbody>
+                </table>
+            </div>
+            </section>
+
         </main>
     </div>
+
+    
 
     <script>
         document.addEventListener('DOMContentLoaded', () => {
@@ -1337,6 +1685,338 @@
             const mainContent = document.getElementById('main-content-wrapper');
             const tocList = document.getElementById('toc-list');
             const sections = document.querySelectorAll('main section');
+
+            // === Outlier Visualisation Chart and Logic ===
+const outlierData = {
+    "BR00$$PG-CIS": {
+        "data": [
+            {"x": "2024-10", "y": 1.26}
+        ],
+        "outliers": []
+    },
+    "BR00$$PG-EGYPT": {
+        "data": [
+            {"x": "2021-07", "y": 20.16},
+            {"x": "2023-11", "y": 20.16},
+            {"x": "2023-12", "y": 0.0},
+            {"x": "2024-01", "y": 0.0},
+            {"x": "2024-02", "y": 0.0},
+            {"x": "2024-03", "y": 0.0},
+            {"x": "2024-04", "y": 0.0},
+            {"x": "2024-05", "y": 0.0},
+            {"x": "2024-06", "y": 0.0},
+            {"x": "2024-07", "y": 0.0},
+            {"x": "2024-08", "y": 0.0},
+            {"x": "2024-09", "y": 0.0},
+            {"x": "2024-10", "y": 20.16}
+        ],
+        "outliers": []
+    }
+};
+
+let outlierChartInstance = null;
+
+function updateOutlierChart(productKey) {
+    const productData = outlierData[productKey];
+    if (!productData) return;
+
+    const dataPoints = productData.data.map(d => ({
+        x: d.x,
+        y: d.y
+    }));
+    
+    const datasets = [{
+        label: 'Demand',
+        data: dataPoints,
+        borderColor: 'rgb(59, 130, 246)',
+        backgroundColor: 'rgba(59, 130, 246, 0.2)',
+        borderWidth: 2,
+        tension: 0.3,
+        pointRadius: 4,
+        pointHoverRadius: 6,
+        fill: true,
+    }];
+
+    if (productData.outliers.length > 0) {
+        const outlierPoints = productData.outliers.map(d => ({
+            x: d.x,
+            y: d.y
+        }));
+        datasets.push({
+            label: 'Outlier',
+            data: outlierPoints,
+            borderColor: 'rgb(239, 68, 68)',
+            backgroundColor: 'rgb(239, 68, 68)',
+            pointRadius: 8,
+            pointHoverRadius: 10,
+            showLine: false,
+            type: 'scatter'
+        });
+    }
+
+    const chartConfig = {
+        type: 'line',
+        data: {
+            datasets: datasets
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    position: 'top',
+                },
+                tooltip: {
+                    callbacks: {
+                        label: function(context) {
+                            let label = context.dataset.label || '';
+                            if (label) {
+                                label += ': ';
+                            }
+                            if (context.parsed.y !== null) {
+                                label += new Intl.NumberFormat('en-US').format(context.parsed.y);
+                            }
+                            return label;
+                        }
+                    }
+                },
+            },
+            scales: {
+                x: {
+                    type: 'time',
+                    time: {
+                        unit: 'month',
+                        tooltipFormat: 'MMM yyyy'
+                    },
+                    title: {
+                        display: true,
+                        text: 'Date',
+                        font: { weight: 'bold' }
+                    },
+                    grid: {
+                        display: false
+                    }
+                },
+                y: {
+                    beginAtZero: true,
+                    title: {
+                        display: true,
+                        text: 'Demand (in units)',
+                        font: { weight: 'bold' }
+                    }
+                }
+            }
+        }
+    };
+
+    if (outlierChartInstance) {
+        outlierChartInstance.destroy();
+    }
+
+    const outlierCtx = document.getElementById('outlierChart').getContext('2d');
+    outlierChartInstance = new Chart(outlierCtx, chartConfig);
+}
+
+// Add this logic to your existing DOMContentLoaded listener
+const productSelect = document.getElementById('productSelect');
+if (productSelect) {
+    Object.keys(outlierData).forEach(key => {
+        const option = document.createElement('option');
+        option.value = key;
+        option.textContent = key;
+        productSelect.appendChild(option);
+    });
+
+    productSelect.addEventListener('change', (event) => {
+        updateOutlierChart(event.target.value);
+    });
+
+    if (Object.keys(outlierData).length > 0) {
+        updateOutlierChart(Object.keys(outlierData)[0]);
+    }
+}
+// Data provided by the user
+        const salesData = {
+            labels: ["2020-01", "2020-02", "2020-03", "2020-04", "2020-05", "2020-06", "2020-07", "2020-08", "2020-09", "2020-10", "2020-11", "2020-12", "2021-01", "2021-02", "2021-03", "2021-04", "2021-05", "2021-06", "2021-07", "2021-08", "2021-09", "2021-10", "2021-11", "2021-12", "2022-01", "2022-02", "2022-03", "2022-04", "2022-05", "2022-06", "2022-07", "2022-08", "2022-09", "2022-10", "2022-11", "2022-12", "2023-01", "2023-02", "2023-03", "2023-04", "2023-05", "2023-06", "2023-07", "2023-08", "2023-09", "2023-10", "2023-11", "2023-12", "2024-01", "2024-02", "2024-03", "2024-04", "2024-05", "2024-06", "2024-07", "2024-08", "2024-09", "2024-10", "2024-11", "2024-12"],
+            'BR00': {
+                name: 'BR00',
+                color: '#CCCCCC',
+                trend: [3688.262377246669, 3867.4419539160376, 4038.7304395984456, 4202.231749178203, 4358.260188881388, 4508.228770933553, 4654.719596183744, 4800.157565792726, 4946.456139833093, 5092.614259993058, 5215.154457586669, 5204.7536225367985, 5137.907594816202, 5055.338384117896, 4998.184283177616, 4999.5259854176375, 5063.705761701714, 5181.531745614354, 5336.490312928364, 5510.300428380173, 5695.91509330646, 5881.809147486225, 6067.6391934257845, 6256.459995780442, 6453.501341941271, 6659.318784402049, 6842.163231447378, 6973.948281024812, 7063.605795925251, 7124.55349698544, 7155.876166219239, 7153.734735491708, 7126.557916792729, 7093.523852464842, 7075.614842385883, 7089.528511632096, 7142.134393224627, 7220.008114175985, 7289.382304658772, 7311.447623810968, 7272.689062197002, 7182.170898877765, 7068.20694849356, 6966.4198529214555, 6887.732574439081, 6846.4383985343875, 6844.610288655403, 6852.558105946222, 6834.6819673249565, 6788.640331778244, 6821.085854953362, 6896.031919041436, 6996.191713011695, 7112.615592986212, 7240.2774223302695, 7375.362540329547, 7515.507925900087, 7659.551000806781, 7807.464482024987, 7960.322282613188],
+                seasonality: [-969.9020792083444, -46.63736903146424, 2174.59351232327, -1935.7912994882233, 1102.6153171026906, -1476.5882738072212, 444.87697653489226, -1252.8498074537054, -687.9081222710154, 1042.5104140700375, 1960.0485405707848, -615.3976322803592, -721.3819122176127, -270.6773265717286, 1659.2600284869136, -1246.5189544559253, 957.0020117569777, -1077.6107902508734, 535.8233845974507, -1380.4368779901345, -297.1320590164257, 972.4306397999175, 1414.4564190076424, -722.5067278173119, -528.4815104806743, -567.7981169685687, 1139.4196104198725, -528.6925553338496, 795.7455522831398, -598.2556964637896, 630.746780248731, -1513.0016356316066, 98.35097514988391, 835.0772818291973, 901.4704907342806, -754.8875459529647, -436.4028733792988, -962.9522067578276, 637.2481673681876, 171.8022878055019, 573.775692804616, 50.97896864891412, 776.2237228956549, -1612.4016633076512, 502.5523991817841, 549.130495709034, 454.8422543081944, -725.9460661689933, -387.61793944725235, -1394.425103102625, 123.25189220832749, 821.5911111845717, 314.579389137705, 795.1728242421998, 972.0732068731953, -1678.2618282585963, 946.5005156046917, 186.24190178823278, 46.53986258993783, -689.1733679147122],
+                residual: [-796.8602980383248, -345.72458488457323, 279.45604807828477, -1108.50044968998, -793.8355059840787, 2461.9595028736676, 1245.763427281363, 1086.9722416609793, 811.691982437922, -1531.4146740630958, 1008.4970018425456, -178.0959902564391, 560.4043174014105, -578.7810575461672, -1006.344311664529, 2738.5129690382873, 971.0322265413079, -1486.900955363481, -3761.6236975258144, -2657.8685503900383, -673.7830342900343, 834.2802127138584, -1066.175612433427, 1667.8217320368694, 366.16016853940255, 1327.3593325665206, 1705.2971581327483, 308.34427430903725, 204.99865179160952, -1366.5978005216502, -561.7829464679699, 426.16690013989773, -1440.2148919426127, 1657.4788657059607, -215.48533312016298, -1215.260965679131, 1596.4084801546705, 1704.884092581843, -926.0704720269596, -3255.9499116164698, 266.67524499838237, -649.6498675266785, 1062.5093286107858, 4924.676810386196, 2440.235026379135, 712.6361057565782, -390.87254296359697, -2076.972039777229, -1487.704027877705, -1869.9952286756188, 145.6822528383109, 718.2569697739918, -515.9761021494005, 1385.971582771589, -245.3706292034649, -303.15071207095116, -598.3484415047787, -1581.072902595014, 532.5556553850747, 1585.391085301524],
+            },
+            'CB00': {
+                name: 'CB00',
+                color: '#CCCCCC',
+                trend: [745.944845788644, 843.4166676539244, 940.1074640899724, 1036.0837293545335, 1131.262782925166, 1225.5732317006689, 1318.9148540420258, 1411.0565252164631, 1501.5755477222192, 1589.5316514648155, 1671.5838930341392, 1737.1201019249752, 1796.393817804535, 1850.8372956224127, 1900.3054258425686, 1940.9462384411054, 1970.1809623809902, 1991.7380927429886, 2008.5713911298487, 2018.3900847238108, 2023.2071654666, 2026.528829377023, 2028.9493851633342, 2024.7521318925872, 2014.667460267084, 2001.6712511469616, 1982.346458613714, 1957.4224276663901, 1935.3893694348008, 1929.0567170406212, 1941.7316585549474, 1967.4212647884592, 1996.3784677900926, 2023.7632097738494, 2049.712337709925, 2073.8978173759992, 2092.0628003357147, 2106.395598800137, 2117.6822385087485, 2119.16280378931, 2101.4132712791243, 2061.600679066742, 2006.093624071331, 1941.1697990930502, 1875.0251253982613, 1812.0128739157494, 1756.2935631521825, 1709.9444140881901, 1674.6878250037064, 1650.7659496227, 1661.0862493453585, 1679.543348174427, 1701.8858803060432, 1727.1110967130319, 1754.7658423203884, 1784.5078992325098, 1816.2242942705655, 1849.8292185000073, 1885.2087367008721, 1922.349756496551],
+                seasonality: [741.5161388235302, 639.7685245365498, -30.205218623289404, -703.2718185191565, 1991.2029320863735, -1202.6205675824176, -886.91359060736, 28.655356175672964, -93.77330844034411, -385.99639264301044, 663.6434982620856, -581.509053137296, 608.6539823349115, 519.8741219652633, -72.84914115081517, -466.487758376553, 1426.9056139744346, -907.1078274406208, -657.3441495975222, -110.10526506040269, 48.04923492570302, -226.27849185305828, 482.75239995015403, -445.4873408074111, 466.0980254346239, 393.5524354631767, -123.9867792151601, -227.50806725634945, 859.2714449598994, -604.1874375415555, -438.1333436994704, -241.65959413733734, 197.0042812841748, -67.06493633929531, 306.4748400141248, -292.9572905887433, 298.31553126530076, 262.81869592727315, -175.95017333754464, 3.4783643396152666, 288.8981493031683, -289.2707303542506, -231.17729486199326, -374.13013212296903, 354.40752463706053, 88.93292654231308, 134.8458695445554, -121.42802631878314, 119.98848532839446, 130.26578720848931, -221.79877745364928, 231.45914575189255, -284.5119877397057, 28.843791730606792, -26.978788837659735, -507.9869957625513, 512.6009679057361, 250.74604766376672, -35.07424396349987, 59.097009838626114],
+                residual: [-252.46098461217423, 57.81480780952586, 191.03775453331718, -114.81191083537703, -2782.4657150115395, 72.04733588174872, 31.998736565334184, -66.71188139213609, 55.17276071812489, 80.46474117819503, 44.77260870377518, 135.38895121232076, 488.0021998605539, -164.68641758767603, -452.45628469175335, 705.5415199354475, -30.086576355424768, 1865.3697346976323, -191.22724153232662, 831.7151803365921, 30.743599607697206, 1543.7496624760354, -1841.7017851134883, 130.73520891482372, -110.7654857017078, 163.7763133898618, 1153.6403206014459, -377.9143604100407, 63.33918560529992, -4.869279499065669, 197.40168514452307, -248.7616706511219, -1233.3827490742674, -306.69827343455404, -1244.18717772405, -447.7905267872559, 491.82166839898446, 172.7857052725899, 478.46793482879593, 207.50883187107456, 44.33857941770748, -229.02994871249143, 321.033670790662, 1419.8603330299188, -222.43265003532179, 492.45419954193767, -115.93943269673787, -206.01638776940695, -306.6763103321009, -175.73173683118944, -242.93747189170927, -86.0024939263194, -66.87389256633742, 145.8451115563612, -309.13705348272856, 32.5790965300414, 126.27473782369839, -162.4252661637738, 53.01550726262781, 274.553233664823],
+            },
+            'EPDM': {
+                name: 'EPDM',
+                color: '#CCCCCC',
+                trend: [2476.3155533751806, 2540.0185619989406, 2601.246496237602, 2659.870417626805, 2715.898220082077, 2769.3834673934557, 2820.660495673495, 2869.986276265761, 2917.1416191452167, 2960.5371852553762, 2991.878169461239, 2957.136990322108, 2899.8431078562485, 2830.052406196577, 2761.859967625241, 2708.9385381580864, 2669.138653290967, 2633.155028717298, 2591.788964987651, 2545.3418157107876, 2500.38045885633, 2469.035151584726, 2459.3795148446293, 2469.865916905619, 2495.1401340747393, 2529.7421934616955, 2573.3928281862636, 2622.4366724945, 2677.3868214869576, 2738.737224853441, 2809.7730136629907, 2895.7727884808833, 2999.233927269716, 3115.9916101019826, 3235.8186416867866, 3350.9668550575107, 3459.0309132003104, 3560.3304979730647, 3650.113043444725, 3723.0257738969703, 3780.4787365268085, 3827.152893392041, 3863.6453542726126, 3887.5284157029273, 3892.9966939332417, 3881.013277037481, 3860.6852371785726, 3843.806558053424, 3838.0757074034095, 3844.301846447721, 3878.864857695151, 3916.808046895537, 3955.516857931708, 3995.271279325046, 4036.594955224324, 4079.8087367571975, 4124.9345561943555, 4171.831500657232, 4220.406245955296, 4270.621731215903],
+                seasonality: [-926.8246082378589, -999.1660153967301, 880.1366997245098, 314.01019034790886, -492.4993913787484, 802.4843616664747, 22.216331204044756, -525.9164025636959, 182.3322201114457, 2031.8685228495626, 139.08520396082787, -1341.2500730560155, -743.4598679179248, -867.9711257753335, 632.7027897209996, 308.8699821154634, -201.45095264357644, 374.00126049242635, -46.3241936009004, -565.6885742189196, 169.91149726100372, 1524.302577865602, 106.3506222489784, -602.9183920450885, -550.9011077709375, -727.9969737459215, 381.0359659317085, 287.35604179373826, 73.76782272007284, -54.72437254812717, -99.59888666991472, -597.031542609463, 152.93842791279565, 1016.401928210995, 73.28946798041429, 148.3926456862857, -353.2559594724365, -587.7202639317966, 110.28788775240089, 256.4212462416782, 304.99544106610387, -473.8116913768239, -119.43622038273031, -607.626330762545, 144.0720592856466, 508.31783598533184, 20.940447318339587, 904.5901388912044, -154.86191020309255, -453.3214800303808, -163.4883828164742, 221.7198708021172, 511.72538587253035, -878.2697884590772, -117.8437247755158, -610.9208317446883, 142.35466641138726, 0.7526635984020444, -42.13258936310491, 1653.924221934498],
+                residual: [-78.77094513732163, -193.32754660221053, -150.3331959621114, 119.26939202528592, -480.2988287033286, 356.0321709400696, 498.7731731224603, 248.2801262979351, 286.12616074333755, 34.64429189506154, -304.588373422067, -198.9869172660924, 483.9467600616763, 955.6637195787562, 1167.8122426537593, -795.4635202735501, 1036.8122993526094, -383.0312892097245, -277.7397713867508, -290.8282414918681, -865.7419561173335, -1598.1627294503278, 824.4948629063924, 588.7774751394691, -471.639026303802, -186.49521971577406, -494.1037941179725, 659.007285711762, 97.6453557929699, -345.2878523053141, -609.9491269930759, 83.75875412857977, 170.82764481748836, -2198.8185383129776, -164.6581096672012, -67.93450074379598, -70.97895372787389, -290.960234041268, 979.4990688028738, 224.37797986135138, 334.000822407088, 875.9337979847824, 54.74086611011762, -293.00208494038225, 148.9312467811119, 31.84388697718714, 71.92431550308811, -798.5466969446284, 157.5112027996829, 193.89963358266004, -232.5514748786768, -310.0279176976542, -411.092243804238, -152.50149086596912, 225.54876955119153, 216.81209498749058, -100.38922260574327, -29.784164255634096, -90.39365659219129, 312.20404684959885],
+            },
+        };
+
+        // Function to create a multi-line chart
+            function createMultiLineChart(canvasId, title, labels, datasets, yAxisTitle) {
+                // Add a check to ensure the canvas element exists before getting its context
+                const canvas = document.getElementById(canvasId);
+                if (!canvas) {
+                    console.error(`Canvas element with ID '${canvasId}' not found.`);
+                    return;
+                }
+                const ctx = canvas.getContext('2d');
+                new Chart(ctx, {
+                    type: 'line',
+                    data: {
+                        labels: labels,
+                        datasets: datasets.map(d => ({
+                            label: d.name,
+                            data: d.data,
+                            borderColor: d.color,
+                            borderWidth: 2,
+                            fill: false,
+                            tension: 0.1,
+                            pointRadius: 0
+                        }))
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                display: true,
+                                position: 'top',
+                                labels: {
+                                    color: '#475569',
+                                    font: {
+                                        size: 14,
+                                        weight: 'bold'
+                                    }
+                                }
+                            },
+                            title: {
+                                display: true,
+                                text: title,
+                                font: {
+                                    size: 16,
+                                    weight: 'bold'
+                                },
+                                color: '#334155'
+                            },
+                            tooltip: {
+                                callbacks: {
+                                    title: function(context) {
+                                        return 'Date: ' + context[0].label;
+                                    },
+                                    label: function(context) {
+                                        return `${context.dataset.label}: ${context.parsed.y.toFixed(2)}`;
+                                    }
+                                }
+                            }
+                        },
+                        scales: {
+                            x: {
+                                type: 'time',
+                                time: {
+                                    unit: 'month'
+                                },
+                                title: {
+                                    display: true,
+                                    text: 'Date',
+                                    color: '#475569'
+                                },
+                                ticks: {
+                                    color: '#64748b'
+                                },
+                                grid: {
+                                    color: '#e2e8f0'
+                                }
+                            },
+                            y: {
+                                title: {
+                                    display: true,
+                                    text: yAxisTitle,
+                                    color: '#475569'
+                                },
+                                ticks: {
+                                    color: '#64748b'
+                                },
+                                grid: {
+                                    color: '#e2e8f0'
+                                }
+                            }
+                        }
+                    }
+                });
+            }
+
+            // Function to render all the combined charts
+            function renderCombinedCharts(labels, data) {
+                const productCodes = ['BR00', 'CB00', 'EPDM'];
+                const colors = {
+                    'BR00': '#FF6384',
+                    'CB00': '#36A2EB',
+                    'EPDM': '#FFCE56'
+                };
+
+                // Prepare datasets for the Trend chart
+                const trendDatasets = productCodes.map(code => ({
+                    name: data[code].name,
+                    data: data[code].trend,
+                    color: colors[code]
+                }));
+
+                // Prepare datasets for the Seasonality chart
+                const seasonalityDatasets = productCodes.map(code => ({
+                    name: data[code].name,
+                    data: data[code].seasonality,
+                    color: colors[code]
+                }));
+
+                // Prepare datasets for the Residual chart
+                const residualDatasets = productCodes.map(code => ({
+                    name: data[code].name,
+                    data: data[code].residual,
+                    color: colors[code]
+                }));
+
+                // Render the combined charts
+                // This call creates the combined Trend chart
+                createMultiLineChart(
+                    'combined-trend-chart',
+                    'Combined Trend Component',
+                    labels,
+                    trendDatasets,
+                    'Trend Value'
+                );
+
+                // This call creates the combined Seasonality chart
+                createMultiLineChart(
+                    'combined-seasonality-chart',
+                    'Combined Seasonality Component',
+                    labels,
+                    seasonalityDatasets,
+                    'Seasonal Effect'
+                );
+
+                // This call creates the combined Residual chart
+                createMultiLineChart(
+                    'combined-residual-chart',
+                    'Combined Residual Component',
+                    labels,
+                    residualDatasets,
+                    'Residual Value'
+                );
+            }
+
+            // Call the function to render the combined charts on page load
+            renderCombinedCharts(salesData.labels, salesData);
+            
 
             // Toggle sidebar on mobile
             toggleButton.addEventListener('click', () => {
@@ -1401,6 +2081,330 @@
                     tocList.appendChild(h2Item);
                 }
             });
+            // Initialize the line chart for sales
+                    const elastomerSalesData = {
+                        labels: ['2020', '2021', '2022', '2023', '2024'],
+                        datasets: [{
+                            label: 'Sales (in K)',
+                            data: [102.74, 119.72, 137.24, 163.67, 153.70],
+                            borderColor: '#00A6FB',
+                            backgroundColor: 'rgba(0, 166, 251, 0.2)',
+                            fill: true,
+                            tension: 0.4
+                        }]
+                    };
+
+                    const salesConfig = {
+                        type: 'line',
+                        data: elastomerSalesData,
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: false,
+                            plugins: {
+                                legend: {
+                                    position: 'top',
+                                    labels: {
+                                        color: '#334155'
+                                    }
+                                },
+                                title: {
+                                    display: true,
+                                    text: 'Sales of Elastomers Over the Years',
+                                    color: '#1e293b',
+                                    font: {
+                                        size: 18,
+                                        weight: 'bold'
+                                    }
+                                }
+                            },
+                            scales: {
+                                x: {
+                                    title: {
+                                        display: true,
+                                        text: 'Year',
+                                        color: '#334155'
+                                    },
+                                    ticks: {
+                                        color: '#334155'
+                                    },
+                                    grid: {
+                                        color: '#e2e8f0'
+                                    }
+                                },
+                                y: {
+                                    title: {
+                                        display: true,
+                                        text: 'Total Sales (K)',
+                                        color: '#334155'
+                                    },
+                                    ticks: {
+                                        color: '#334155'
+                                    },
+                                    grid: {
+                                        color: '#e2e8f0'
+                                    }
+                                }
+                            }
+                        }
+                    };
+
+                    const salesChartCtx = document.getElementById('salesChart');
+                    if (salesChartCtx) {
+                        new Chart(salesChartCtx, salesConfig);
+                    }
+                    // Data provided by the user for the charts and table
+        const contributionData = {
+            "Sku": {
+                volume: {
+                    labels: ["22010715", "22010693", "22010697", "22010712", "22010703", "22096892", "22012980", "22202714", "22096887", "22200721", "Other"],
+                    data: [266111.65, 66506.1, 61812.08, 64539.72, 40918.98, 40950.0, 18102.42, 15836.94, 20772.05, 17914.7, 108609.26],
+                    percentage: [39.3, 9.82, 9.13, 9.53, 6.04, 6.05, 2.67, 2.34, 3.07, 2.65, 9.4]
+                },
+                revenue: {
+                    labels: ["22010715", "22010693", "22010697", "22010712", "22010703", "22096892", "22012980", "22202714", "22096887", "22200721", "Other"],
+                    data: [423627497.85, 151632618.91, 131726159.91, 98541787.1, 92115651.88, 35294761.9, 28310727.37, 26059096.89, 19493564.35, 18573506.02, 105188444.12],
+                    percentage: [37.73, 13.51, 11.73, 8.78, 8.2, 3.14, 2.52, 2.32, 1.74, 1.65, 8.58]
+                }
+            },
+            "Grade": {
+                volume: {
+                    labels: ["BR4610", "EPDM657", "EPDM756", "BR5510", "EPDM626", "EPDM855", "CCCN339", "CCCN220", "N330", "EPDM245", "Other"],
+                    data: [300051.01, 66506.1, 61812.08, 73141.74, 40918.98, 16868.19, 44366.0, 24070.05, 17914.7, 5314.1, 63712.95],
+                    percentage: [44.32, 9.82, 9.13, 10.8, 6.04, 2.49, 6.55, 3.56, 2.65, 0.78, 3.86]
+                },
+                revenue: {
+                    labels: ["BR4610", "EPDM657", "EPDM756", "BR5510", "EPDM626", "EPDM855", "CCCN339", "CCCN220", "N330", "EPDM245", "Other"],
+                    data: [477997322.1, 151632618.91, 131726159.91, 113706095.18, 92115651.88, 38149525.66, 37926236.9, 22480584.35, 18573506.02, 13150878.56, 91392686.83],
+                    percentage: [42.57, 13.51, 11.73, 10.13, 8.2, 3.4, 3.38, 2.0, 1.65, 1.17, 1.26]
+                }
+            },
+            "Product Application": {
+                volume: {
+                    labels: ["NI00", "CRYS", "HARD", "AMOR", "GYT0", "Other"],
+                    data: [352585.31, 169237.16, 108626.69, 22182.29, 24438.96, 4.5],
+                    percentage: [52.07, 25.0, 16.04, 3.28, 3.61, 0.0]
+                },
+                revenue: {
+                    labels: ["NI00", "CRYS", "HARD", "AMOR", "GYT0", "Other"],
+                    data: [554734139.67, 375474430.7, 100001071.34, 51300404.22, 41223404.97, 8415.41],
+                    percentage: [49.41, 33.44, 8.91, 4.57, 3.67, 0.0]
+                }
+            },
+            "Product Group": {
+                volume: {
+                    labels: ["BR00", "EPDM", "CB00"],
+                    data: [377024.27, 191423.95, 108626.69],
+                    percentage: [55.68, 28.27, 16.04]
+                },
+                revenue: {
+                    labels: ["BR00", "EPDM", "CB00"],
+                    data: [595957544.63, 426783250.33, 100001071.34],
+                    percentage: [53.08, 38.01, 8.91]
+                }
+            },
+            "Product Family": {
+                volume: {
+                    labels: ["SR"],
+                    data: [677074.9],
+                    percentage: [100.0]
+                },
+                revenue: {
+                    labels: ["SR"],
+                    data: [1122741866.3],
+                    percentage: [100.0]
+                }
+            }
+        };
+
+        let volumeChartInstance = null;
+        let revenueChartInstance = null;
+
+        // Function to render Volume and Revenue Contribution Charts and Table
+        function renderContributionCharts(hierarchyLevel) {
+            const data = contributionData[hierarchyLevel];
+
+            if (!data) {
+                console.error("Data for selected hierarchy level not found.");
+                return;
+            }
+
+            const volumeChartCtx = document.getElementById('volumeContributionChart').getContext('2d');
+            const revenueChartCtx = document.getElementById('revenueContributionChart').getContext('2d');
+            const tableBody = document.getElementById('salesContributionTable').querySelector('tbody');
+
+            // Destroy previous chart instances to prevent duplicates
+            if (volumeChartInstance) {
+                volumeChartInstance.destroy();
+            }
+            if (revenueChartInstance) {
+                revenueChartInstance.destroy();
+            }
+            
+            // Generate dynamic colors for the charts
+            const backgroundColors = data.volume.labels.map((_, i) => `hsl(${i * 360 / data.volume.labels.length}, 70%, 50%)`);
+            const borderColors = data.volume.labels.map(() => '#FFFFFF');
+
+            // Render Volume Contribution Chart (Doughnut Chart)
+            volumeChartInstance = new Chart(volumeChartCtx, {
+                type: 'doughnut',
+                data: {
+                    labels: data.volume.labels,
+                    datasets: [{
+                        label: 'Contribution by Volume (mT)',
+                        data: data.volume.data,
+                        backgroundColor: backgroundColors,
+                        borderColor: borderColors,
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    const label = context.label || '';
+                                    const value = context.parsed;
+                                    const percentage = data.volume.percentage[context.dataIndex];
+                                    return `${label}: ${value.toLocaleString()} mT (${percentage}%)`;
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+
+            // Render Revenue Contribution Chart (Doughnut Chart)
+            revenueChartInstance = new Chart(revenueChartCtx, {
+                type: 'doughnut',
+                data: {
+                    labels: data.revenue.labels,
+                    datasets: [{
+                        label: 'Contribution by Revenue ($)',
+                        data: data.revenue.data,
+                        backgroundColor: backgroundColors,
+                        borderColor: borderColors,
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    const label = context.label || '';
+                                    const value = context.parsed;
+                                    const percentage = data.revenue.percentage[context.dataIndex];
+                                    return `${label}: $${value.toLocaleString()} (${percentage}%)`;
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+
+            // Populate the table
+            tableBody.innerHTML = '';
+            data.volume.labels.forEach((label, index) => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${label}</td>
+                    <td>${data.volume.data[index].toLocaleString()}</td>
+                    <td>${data.volume.percentage[index]}%</td>
+                    <td>$${data.revenue.data[index].toLocaleString()}</td>
+                    <td>${data.revenue.percentage[index]}%</td>
+                `;
+                tableBody.appendChild(row);
+            });
+        }
+
+        // Event listener for the dropdown menu
+        document.getElementById('productHierarchySelect').addEventListener('change', (event) => {
+            renderContributionCharts(event.target.value);
+        });
+
+        // Initial render on page load
+        document.addEventListener('DOMContentLoaded', () => {
+            const initialHierarchy = document.getElementById('productHierarchySelect').value;
+            renderContributionCharts(initialHierarchy);
+        });
+
+            // Function to render a single Grade Distribution Chart - UPDATED with SABIC Colors
+            function renderGradeDistributionChart(year) {
+                const data = gradeSalesData[year];
+                const ctx = document.getElementById(`gradeChart${year}`).getContext('2d');
+
+                // Destroy previous chart instance if it exists
+                if (gradeCharts[year]) {
+                    gradeCharts[year].destroy();
+                }
+
+                // Map labels to data with percentages
+                const chartLabels = data.labels.map((label, i) => `${label} (${data.percentage[i].toFixed(2)}%)`);
+
+                // Dynamically assign colors based on the gradeColorMap
+                const assignedColors = data.labels.map(label => {
+                    // Check for exact match or if it's the "Other" category
+                    return gradeColorMap[label] || sabicColors[Math.floor(Math.random() * sabicColors.length)]; // Fallback if grade not in map
+                });
+
+
+                gradeCharts[year] = new Chart(ctx, { // Store chart instance in the global map
+                    type: 'doughnut',
+                    data: {
+                        labels: chartLabels,
+                        datasets: [{
+                            data: data.data,
+                            backgroundColor: assignedColors, // Use the dynamically assigned colors
+                            hoverOffset: 10
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            title: {
+                                display: false, // Set to false to avoid conflict with H4
+                            },
+                            tooltip: {
+                                callbacks: {
+                                    label: function(context) {
+                                        const label = context.label || '';
+                                        const value = context.raw;
+                                        const percentage = data.percentage[context.dataIndex].toFixed(2);
+                                        return `${label}: ${formatLargeNumber(value)} mT (${percentage}%)`;
+                                    }
+                                }
+                            },
+                            legend: {
+                                position: 'right',
+                                align: 'center',
+                                labels: {
+                                    boxWidth: 20,
+                                    padding: 15,
+                                    font: {
+                                        size: 12,
+                                        family: 'Inter'
+                                    },
+                                    color: '#475569'
+                                }
+                            },
+                            datalabels: { // Disable datalabels for this chart
+                                display: false
+                            }
+                        }
+                    }
+                });
+            }
 
             // Smooth scrolling for anchor links (for all a tags)
             tocList.addEventListener('click', (e) => {
@@ -1422,5 +2426,8 @@
             });
         });
     </script>
+
+    
 </body>
+
 </html>
